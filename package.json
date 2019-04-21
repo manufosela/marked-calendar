@@ -1,6 +1,6 @@
 {
   "name": "marked-calendar",
-  "description": "Lit-Element webcomponent wc name",
+  "description": "Lit-Element webcomponent marked-calendar",
   "version": "1.0.0",
   "main": "marked-calendar.js",
   "repository": {
