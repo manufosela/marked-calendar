@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+  <head>
+    <title>marked-calendar demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+    <script type="module" src="../marked-calendar.js"></script>
+    <style>
+      .blocks {
+        display:flex;
+        display-direction:row;
+        flex-wrap: wrap;
+      }
+      .block {
+        display:flex;
+        display-direction:column;
+        flex-wrap: wrap;
+        white-space: normal;
+      }
+      .code {
+        padding: 20px;
+        color:#FFF; 
+        background: #000;
+      }
+      .attributes {
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="vertical-section-container centered">
+      <h3>Basic marked-calendar Demo</h3>
+      <div class="blocks">
+        <pre class="block code">
+          <code>
+            &lt;marked-calendar year="2019" title="Imputacion de horas" weekends options=[["#0F0","V"],["#F00","A"],["#00F","T"],["#F90","E"]]&gt;&lt;/marked-calendar&gt;
+          </code>
+        </pre>
+        <pre class="block attributes">
+          <h3>Attributes</h3>
+          <ul>
+            <li>year (Number)</li>
+            <li>title (String)</li>
+            <li>savedata (Boolean)</li>
+            <li>weekends (Boolean)</li>
+            <li>options (Array Stringify)</li>
+          </ul>
+        </pre>
+      </div>
+
+      <marked-calendar year="2019" title="Imputacion de horas" savedata weekends options=[["#0F0","V"],["#FF0","LD"],["#F00","A"],["#00F","T"],["#F90","E"]]></marked-calendar>
+    </div>
+  </body>
+</html>
