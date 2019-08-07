@@ -180,7 +180,6 @@ import { LitElement, html, css } from 'lit-element';
     this.year = 2019;
     this.savedata = false;
     this.weekends = false;
-    this.holidays = [];
     this.COLORS = {
       0: { code: '#FFFFFF', label: 'X'},
       1: { code: '#2DE1C2', label: '😃' },
@@ -190,6 +189,8 @@ import { LitElement, html, css } from 'lit-element';
       5: { code: '#305654', label: '😭' }
     };
     this.options = '';
+    this.holidays = '';
+    this.arrHolidays = [];
     this.MONTH_LETTERS = [
       'E',
       'F',
@@ -230,10 +231,12 @@ import { LitElement, html, css } from 'lit-element';
 
       color.style.background = this.getGradient(this.COLORS[e].code);
 
+
       mood.setAttribute('mood', e);
       color.setAttribute('mood', e);
 
       mood.textContent += this.COLORS[e].label;
+      mood.title = this.COLORS[e].title;
       mood.appendChild(color);
 
       this.MOODS.appendChild(mood);
@@ -268,17 +271,27 @@ import { LitElement, html, css } from 'lit-element';
   setDayStyle(month, monthContainer) {
     const data = this.getCurrentLSStructure();
     let days = Object.keys(data[month]);
+    let holidays = (this.arrHolidays.length > 0);
+    let noHolidays = true;
+    let noWeekend = true;
     days.forEach(day => {
       let dayContainer = document.createElement('div');
       dayContainer.className = 'dayContainer';
-      dayContainer.onclick = (e) => {
-        this.assignMood(month, day, dayContainer, e);
-      };
+      
       if (data[month][day]) {
         dayContainer.style.background = this.getGradient(this.COLORS[data[month][day]].code);
+        dayContainer.title = this.COLORS[data[month][day]].label;
       }
       if (this.weekends) {
-        dayContainer = this.drawIsWeekend(dayContainer, month, day);
+        [dayContainer, noWeekend] = this.drawIsWeekend(dayContainer, month, day);
+      }
+      if (holidays) {
+        [dayContainer, noHolidays] = this.drawIsHoliday(dayContainer, month, day);
+      }
+      if (noHolidays && noWeekend) {
+        dayContainer.onclick = (e) => {
+          this.assignMood(month, day, dayContainer, e);
+        };
       }
       monthContainer.appendChild(dayContainer);
     });
@@ -308,11 +321,29 @@ import { LitElement, html, css } from 'lit-element';
   }
 
   drawIsWeekend(dayContainer, month, day) {
+    let noWeekend = true;
     let DoW = new Date(`${this.year}/${Number(month) + 1}/${Number(day) + 1}`).getDay();
     if (DoW === 0 || DoW === 6) {
       dayContainer.style.background = '#CCC';
+      dayContainer.style.cursor = 'not-allowed';
+      noWeekend = false;
     }
-    return dayContainer;
+    return [dayContainer, noWeekend];
+  }
+
+  drawIsHoliday(dayContainer, month, day) {
+    let noHolidays = true;
+    let d = String(Number(day) + 1);
+    let m = String(Number(month) + 1);
+    this.arrHolidays.forEach(dayHoliday => {
+      if (dayHoliday.date === d + '/' + m) {
+        dayContainer.style.background = '#999';
+        dayContainer.style.cursor = 'not-allowed';
+        dayContainer.title = dayHoliday.title;
+        noHolidays = false;
+      }
+    });
+    return [dayContainer, noHolidays];
   }
 
   assignMood(month, day, item, e) {
@@ -320,14 +351,12 @@ import { LitElement, html, css } from 'lit-element';
     data[month][day] = this.selectedMood;
 
     if (this.selectedMood) {
-      let DoW = new Date(`${this.year}/${Number(month) + 1}/${Number(day) + 1}`).getDay();
-      if (this.weekends && DoW !== 0 && DoW !== 6) {
-        item.style.background = this.getGradient(this.COLORS[this.selectedMood].code);
-        let settingCalenderEvent = new CustomEvent('setting-calendarItem', { detail: {year: this.year, month: month, day: day, mood: this.selectedMood} });
-        this.dispatchEvent(settingCalenderEvent);
-        if (this.savedata) {
-          localStorage.setItem('structure' + this.year, JSON.stringify(data));
-        }
+      item.style.background = this.getGradient(this.COLORS[this.selectedMood].code);
+      item.title = this.COLORS[this.selectedMood].label;
+      let settingCalenderEvent = new CustomEvent('setting-calendarItem', { detail: {year: this.year, month: month, day: day, mood: this.selectedMood} });
+      this.dispatchEvent(settingCalenderEvent);
+      if (this.savedata) {
+        localStorage.setItem('structure' + this.year, JSON.stringify(data));
       }
     } else {
       this.showNotice(e);
@@ -371,14 +400,21 @@ import { LitElement, html, css } from 'lit-element';
       let opts = JSON.parse(this.options);
       opts.unshift(['#FFFFFF', 'X']);
       this.COLORS = Object.assign({}, opts.map((opt) => { 
-        return {'code': opt[0], 'label': opt[1] } 
+        return {'code': opt[0], 'label': opt[1], 'title': opt[2] } 
       }));
     }
   }
 
+  getHolidays() {
+    if (this.holidays !== '') {
+      this.arrHolidays = JSON.parse(this.holidays);
+    }
+  }
+
   firstUpdated() {
-    this.title = this.title || html`Year in pixels`;
+    this.name = this.name || html`Year in pixels`;
     this.getOptions();
+    this.getHolidays();
     this.YEAR_CONTAINER = this.shadowRoot.querySelector('#yearContainer');
     this.DAYS_HEADER = this.shadowRoot.querySelector('#daysHeader');
     this.MONTH_HEADER = this.shadowRoot.querySelector('#monthHeader');
@@ -395,7 +431,7 @@ import { LitElement, html, css } from 'lit-element';
 
   render() {
     return html`
-      <h1 class="title">${this.title} (${this.year})</h1>
+      <h1 class="title">${this.name} (${this.year})</h1>
       <div id="guide">
         <div id="selectedMood">Selected option: <span></span></div>
         <div id="moods"></div>

@@ -49,7 +49,13 @@
         </pre>
       </div>
 
-      <marked-calendar year="2019" title="Imputacion de horas" savedata weekends options=[["#0F0","V"],["#FF0","LD"],["#F00","A"],["#00F","T"],["#F90","E"]]></marked-calendar>
+      <marked-calendar 
+        year="2019" 
+        name="Imputacion de horas"
+        savedata weekends 
+        options='[["#0F0","V", "Vacaciones"],["#FF0","LD", "Libre Disposición"],["#F00","A", "Ausencia"],["#00F","T", "Teletrabajo"],["#F90","DE", "Dia de Eventos"],["#F0F", "AH", "Autorizado por el Head"],["#0FF", "CD", "Dia de la Capacidad"]]'
+        holidays='[{"title": "Día de la comunidad de Madrid", "date":"2/5"}]'>
+      </marked-calendar>
     </div>
   </body>
 </html>
