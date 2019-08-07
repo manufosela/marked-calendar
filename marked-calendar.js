@@ -19,7 +19,8 @@ import { LitElement, html, css } from 'lit-element';
       title: { type: String },
       savedata: { type: Boolean },
       weekends: { type: Boolean },
-      options: { type: String } // stringify of an array
+      options: { type: String }, // stringify of an array
+      holidays: { type: String } // stringify of an array
     };
   }
 
@@ -224,13 +225,13 @@ import { LitElement, html, css } from 'lit-element';
     let colorKeys = Object.keys(this.COLORS);
 
     colorKeys.forEach(e => {
-      let mood = document.createElement("div");
-      let color = document.createElement("span");
+      let mood = document.createElement('div');
+      let color = document.createElement('span');
 
       color.style.background = this.getGradient(this.COLORS[e].code);
 
-      mood.setAttribute("mood", e);
-      color.setAttribute("mood", e);
+      mood.setAttribute('mood', e);
+      color.setAttribute('mood', e);
 
       mood.textContent += this.COLORS[e].label;
       mood.appendChild(color);
@@ -240,28 +241,21 @@ import { LitElement, html, css } from 'lit-element';
   }
 
   checkLocalStorage() {
-    if (window.localStorage["structure"+this.year] === undefined) {
+    if (window.localStorage['structure' + this.year] === undefined) {
       let structure = this.generateDataStructure();
-      localStorage.setItem("structure"+this.year, JSON.stringify(structure));
+      localStorage.setItem('structure' + this.year, JSON.stringify(structure));
     }
   }
 
   generateDataStructure() {
     let data = {};
-  
-  for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 12; i++) {
       data[i] = Array.from({ length: this.getDaysFromMonth(i + 1) }, () => null);
     }
     return data;
   }
 
-  generateVisualStructure() {
-    const data = this.getCurrentLSStructure();
-    const months = Object.keys(data);
-    const dayHeaderLength = 31;
-
-    let monthHeaderSet = false;
-
+  createDayCells(dayHeaderLength) {
     for (let day = 1; day <= dayHeaderLength; day++) {
       let dayHeader = document.createElement('div');
       dayHeader.className = 'dayHeader';
@@ -269,7 +263,30 @@ import { LitElement, html, css } from 'lit-element';
 
       this.DAYS_HEADER.appendChild(dayHeader);
     }
+  }
 
+  setDayStyle(month, monthContainer) {
+    const data = this.getCurrentLSStructure();
+    let days = Object.keys(data[month]);
+    days.forEach(day => {
+      let dayContainer = document.createElement('div');
+      dayContainer.className = 'dayContainer';
+      dayContainer.onclick = (e) => {
+        this.assignMood(month, day, dayContainer, e);
+      };
+      if (data[month][day]) {
+        dayContainer.style.background = this.getGradient(this.COLORS[data[month][day]].code);
+      }
+      if (this.weekends) {
+        dayContainer = this.drawIsWeekend(dayContainer, month, day);
+      }
+      monthContainer.appendChild(dayContainer);
+    });
+  }
+
+  createMonths() {
+    const data = this.getCurrentLSStructure();
+    const months = Object.keys(data);
     months.forEach(month => {
       let monthContainer = document.createElement('div');
       monthContainer.className = 'monthContainer';
@@ -277,29 +294,17 @@ import { LitElement, html, css } from 'lit-element';
       monthHeader.className = 'monthHeader';
       monthHeader.textContent = this.MONTH_LETTERS[month];
 
-      let days = Object.keys(data[month]);
-
-      days.forEach(day => {
-        let dayContainer = document.createElement('div');
-        dayContainer.className = 'dayContainer';
-        dayContainer.onclick = (e) => {
-          this.assignMood(month, day, dayContainer, e);
-        };
-
-        if (data[month][day]) {
-          dayContainer.style.background = this.getGradient(this.COLORS[data[month][day]].code);
-        }
-
-        if (this.weekends) {
-          dayContainer = this.drawIsWeekend(dayContainer, month, day);
-        }
-
-        monthContainer.appendChild(dayContainer);
-      });
+      this.setDayStyle(month, monthContainer);
 
       this.MONTH_HEADER.appendChild(monthHeader);
       this.YEAR_CONTAINER.appendChild(monthContainer);
     });
+  }
+
+  generateVisualStructure() {
+    const dayHeaderLength = 31;
+    this.createDayCells(dayHeaderLength);
+    this.createMonths();
   }
 
   drawIsWeekend(dayContainer, month, day) {
@@ -364,7 +369,7 @@ import { LitElement, html, css } from 'lit-element';
   getOptions() {
     if (this.options !== '') {
       let opts = JSON.parse(this.options);
-      opts.unshift(['#FFFFFF','X']);
+      opts.unshift(['#FFFFFF', 'X']);
       this.COLORS = Object.assign({}, opts.map((opt) => { 
         return {'code': opt[0], 'label': opt[1] } 
       }));
