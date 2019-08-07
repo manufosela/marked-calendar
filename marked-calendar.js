@@ -23,7 +23,7 @@ import { LitElement, html, css } from 'lit-element';
     };
   }
 
-  static get styles(){
+  static get styles() {
     return css`
       :host {
         background: #f8f7f2;
@@ -173,34 +173,35 @@ import { LitElement, html, css } from 'lit-element';
       }
     `;
   }
-  
+
   constructor() {
     super();
     this.year = 2019;
     this.savedata = false;
     this.weekends = false;
+    this.holidays = [];
     this.COLORS = {
-      0: { code: "#FFFFFF", label: "X"},
-      1: { code: "#2DE1C2", label: "😃" },
-      2: { code: "#01BAEF", label: "😊" },
-      3: { code: "#AFBFC0", label: "😐" },
-      4: { code: "#037171", label: "😞" },
-      5: { code: "#305654", label: "😭" }
+      0: { code: '#FFFFFF', label: 'X'},
+      1: { code: '#2DE1C2', label: '😃' },
+      2: { code: '#01BAEF', label: '😊' },
+      3: { code: '#AFBFC0', label: '😐' },
+      4: { code: '#037171', label: '😞' },
+      5: { code: '#305654', label: '😭' }
     };
-    this.options = "";
+    this.options = '';
     this.MONTH_LETTERS = [
-      "E",
-      "F",
-      "M",
-      "A",
-      "M",
-      "J",
-      "J",
-      "A",
-      "S",
-      "O",
-      "N",
-      "D"
+      'E',
+      'F',
+      'M',
+      'A',
+      'M',
+      'J',
+      'J',
+      'A',
+      'S',
+      'O',
+      'N',
+      'D'
     ];
     this.selectedMood = null;
   }
@@ -221,88 +222,90 @@ import { LitElement, html, css } from 'lit-element';
 
   setMoods() {
     let colorKeys = Object.keys(this.COLORS);
-  
+
     colorKeys.forEach(e => {
       let mood = document.createElement("div");
       let color = document.createElement("span");
-  
+
       color.style.background = this.getGradient(this.COLORS[e].code);
-  
+
       mood.setAttribute("mood", e);
       color.setAttribute("mood", e);
-  
+
       mood.textContent += this.COLORS[e].label;
       mood.appendChild(color);
-  
+
       this.MOODS.appendChild(mood);
     });
-  };
-  
+  }
+
   checkLocalStorage() {
     if (window.localStorage["structure"+this.year] === undefined) {
       let structure = this.generateDataStructure();
       localStorage.setItem("structure"+this.year, JSON.stringify(structure));
     }
-  };
-  
+  }
+
   generateDataStructure() {
     let data = {};
   
-    for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 12; i++) {
       data[i] = Array.from({ length: this.getDaysFromMonth(i + 1) }, () => null);
     }
     return data;
-  };
-  
+  }
+
   generateVisualStructure() {
     const data = this.getCurrentLSStructure();
     const months = Object.keys(data);
     const dayHeaderLength = 31;
-  
+
     let monthHeaderSet = false;
-  
+
     for (let day = 1; day <= dayHeaderLength; day++) {
-      let dayHeader = document.createElement("div");
-      dayHeader.className = "dayHeader";
+      let dayHeader = document.createElement('div');
+      dayHeader.className = 'dayHeader';
       dayHeader.textContent = day;
-  
+
       this.DAYS_HEADER.appendChild(dayHeader);
     }
-  
+
     months.forEach(month => {
-      let monthContainer = document.createElement("div");
-      monthContainer.className = "monthContainer";
-      let monthHeader = document.createElement("div");
-      monthHeader.className = "monthHeader";
+      let monthContainer = document.createElement('div');
+      monthContainer.className = 'monthContainer';
+      let monthHeader = document.createElement('div');
+      monthHeader.className = 'monthHeader';
       monthHeader.textContent = this.MONTH_LETTERS[month];
-  
+
       let days = Object.keys(data[month]);
-  
+
       days.forEach(day => {
-        let dayContainer = document.createElement("div");
-        dayContainer.className = "dayContainer";
+        let dayContainer = document.createElement('div');
+        dayContainer.className = 'dayContainer';
         dayContainer.onclick = (e) => {
-        this.assignMood(month, day, dayContainer, e);
+          this.assignMood(month, day, dayContainer, e);
         };
 
         if (data[month][day]) {
           dayContainer.style.background = this.getGradient(this.COLORS[data[month][day]].code);
         }
 
-        if (this.weekends) { dayContainer = this.drawIsWeekend(dayContainer, month, day); }
+        if (this.weekends) {
+          dayContainer = this.drawIsWeekend(dayContainer, month, day);
+        }
 
         monthContainer.appendChild(dayContainer);
       });
-  
+
       this.MONTH_HEADER.appendChild(monthHeader);
       this.YEAR_CONTAINER.appendChild(monthContainer);
     });
   }
-  
+
   drawIsWeekend(dayContainer, month, day) {
-    let DoW = new Date(`${this.year}/${Number(month)+1}/${Number(day)+1}`).getDay();
+    let DoW = new Date(`${this.year}/${Number(month) + 1}/${Number(day) + 1}`).getDay();
     if (DoW === 0 || DoW === 6) {
-      dayContainer.style.background = "#CCC";
+      dayContainer.style.background = '#CCC';
     }
     return dayContainer;
   }
@@ -310,27 +313,31 @@ import { LitElement, html, css } from 'lit-element';
   assignMood(month, day, item, e) {
     let data = this.getCurrentLSStructure();
     data[month][day] = this.selectedMood;
-  
+
     if (this.selectedMood) {
-      let DoW = new Date(`${this.year}/${Number(month)+1}/${Number(day)+1}`).getDay();
+      let DoW = new Date(`${this.year}/${Number(month) + 1}/${Number(day) + 1}`).getDay();
       if (this.weekends && DoW !== 0 && DoW !== 6) {
         item.style.background = this.getGradient(this.COLORS[this.selectedMood].code);
         let settingCalenderEvent = new CustomEvent('setting-calendarItem', { detail: {year: this.year, month: month, day: day, mood: this.selectedMood} });
         this.dispatchEvent(settingCalenderEvent);
-        if ( this.savedata ) { localStorage.setItem("structure"+this.year, JSON.stringify(data)); }
+        if (this.savedata) {
+          localStorage.setItem('structure' + this.year, JSON.stringify(data));
+        }
       }
     } else {
       this.showNotice(e);
     }
   }
-  
+
   showNotice(e) {
-    this.NOTICE_LAYER.style.display = "block";
+    this.NOTICE_LAYER.style.display = 'block';
     let w = this.NOTICE_LAYER.offsetWidth;
     let h = this.NOTICE_LAYER.offsetHeight;
-    this.NOTICE_LAYER.style.top = (e.pageY-h/2)+"px";
-    this.NOTICE_LAYER.style.left = (e.pageX-w/2)+"px";
-    setTimeout(()=>{this.NOTICE_LAYER.style.display="none";}, 1000);
+    this.NOTICE_LAYER.style.top = (e.pageY - h / 2) + 'px';
+    this.NOTICE_LAYER.style.left = (e.pageX - w / 2) + 'px';
+    setTimeout(() =>{ 
+      this.NOTICE_LAYER.style.display = 'none';
+    }, 1000);
   }
 
   getDaysFromMonth(month) {
@@ -338,16 +345,16 @@ import { LitElement, html, css } from 'lit-element';
   }
 
   getCurrentLSStructure() {
-    return JSON.parse(window.localStorage["structure"+this.year]);
+    return JSON.parse(window.localStorage['structure'+this.year]);
   }
-  
+
   getGradient(colorId) {
     return `radial-gradient(ellipse at center, rgba(255,255,255,.1) -95%, ${colorId} 100%)`;
   }
 
   updated() {    
-    this.GUIDES.addEventListener("click", e => {
-      if (e.target.attributes[0].value>=0) {
+    this.GUIDES.addEventListener('click', e => {
+      if (e.target.attributes[0].value >= 0) {
         this.selectedMood = e.target.attributes[0].value;
         this.SELECTED_MOOD.style.background = this.getGradient(this.COLORS[this.selectedMood].code);
       }
@@ -355,28 +362,30 @@ import { LitElement, html, css } from 'lit-element';
   }
 
   getOptions() {
-    if (this.options!=="") {
+    if (this.options !== '') {
       let opts = JSON.parse(this.options);
-      opts.unshift(["#FFFFFF","X"]);
-      this.COLORS = Object.assign({}, opts.map((opt) => { return {"code":opt[0],"label":opt[1] } }));
+      opts.unshift(['#FFFFFF','X']);
+      this.COLORS = Object.assign({}, opts.map((opt) => { 
+        return {'code': opt[0], 'label': opt[1] } 
+      }));
     }
   }
 
   firstUpdated() {
     this.title = this.title || html`Year in pixels`;
     this.getOptions();
-    this.YEAR_CONTAINER = this.shadowRoot.querySelector("#yearContainer");
-    this.DAYS_HEADER = this.shadowRoot.querySelector("#daysHeader");
-    this.MONTH_HEADER = this.shadowRoot.querySelector("#monthHeader");
-    this.GUIDES = this.shadowRoot.querySelector("#guide");
-    this.GUIDES = this.shadowRoot.querySelector("#guide");
-    this.SELECTED_MOOD = this.shadowRoot.querySelector("#selectedMood span");
-    this.MOODS = this.shadowRoot.querySelector("#moods");
-    this.NOTICE_LAYER = this.renderRoot.querySelector("#notice");
+    this.YEAR_CONTAINER = this.shadowRoot.querySelector('#yearContainer');
+    this.DAYS_HEADER = this.shadowRoot.querySelector('#daysHeader');
+    this.MONTH_HEADER = this.shadowRoot.querySelector('#monthHeader');
+    this.GUIDES = this.shadowRoot.querySelector('#guide');
+    this.GUIDES = this.shadowRoot.querySelector('#guide');
+    this.SELECTED_MOOD = this.shadowRoot.querySelector('#selectedMood span');
+    this.MOODS = this.shadowRoot.querySelector('#moods');
+    this.NOTICE_LAYER = this.renderRoot.querySelector('#notice');
     this.checkLocalStorage();
     this.generateVisualStructure();
     this.setMoods();
-    this.renderRoot.querySelector(`div [mood="0"] span`).style.border = "1px solid black";
+    this.renderRoot.querySelector('div [mood="0"] span').style.border = '1px solid black';
   }
 
   render() {
