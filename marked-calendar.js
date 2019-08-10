@@ -10,12 +10,15 @@ import { LitElement, html, css } from 'lit-element';
  * @demo demo/index.html
  */
 
- class MarkedCalendar extends LitElement {
-  static get is() { return 'marked-calendar'; }
+class MarkedCalendar extends LitElement {
+  static get is() { 
+    return 'marked-calendar';
+  }
 
   static get properties() {
     return {
-      year: { type: Number, value: 2019 },
+      lang: { type: String },
+      year: { type: Number },
       title: { type: String },
       savedata: { type: Boolean },
       weekends: { type: Boolean },
@@ -177,6 +180,7 @@ import { LitElement, html, css } from 'lit-element';
 
   constructor() {
     super();
+    this.lang = 'sp';
     this.year = 2019;
     this.savedata = false;
     this.weekends = false;
@@ -191,20 +195,22 @@ import { LitElement, html, css } from 'lit-element';
     this.options = '';
     this.holidays = '';
     this.arrHolidays = [];
-    this.MONTH_LETTERS = [
-      'E',
-      'F',
-      'M',
-      'A',
-      'M',
-      'J',
-      'J',
-      'A',
-      'S',
-      'O',
-      'N',
-      'D'
-    ];
+    this.MONTH_LETTERS = {
+      "sp": [
+        { "letter": "E", "name": "Enero" },
+        { "letter": "F", "name": "Febrero" },
+        { "letter": "M", "name": "Marzo" },
+        { "letter": "A", "name": "Abril" },
+        { "letter": "M", "name": "Mayo" },
+        { "letter": "J", "name": "Junio" },
+        { "letter": "J", "name": "Julio" },
+        { "letter": "A", "name": "Agosto" },
+        { "letter": "S", "name": "Septiembre" },
+        { "letter": "O", "name": "Octubre" },
+        { "letter": "N", "name": "Noviembre" },
+        { "letter": "D", "name": "Diciembre" }
+      ]
+    };
     this.selectedMood = null;
   }
 
@@ -305,7 +311,8 @@ import { LitElement, html, css } from 'lit-element';
       monthContainer.className = 'monthContainer';
       let monthHeader = document.createElement('div');
       monthHeader.className = 'monthHeader';
-      monthHeader.textContent = this.MONTH_LETTERS[month];
+      monthHeader.textContent = this.MONTH_LETTERS[this.lang][month].letter;
+      monthHeader.title = this.MONTH_LETTERS[this.lang][month].name;
 
       this.setDayStyle(month, monthContainer);
 

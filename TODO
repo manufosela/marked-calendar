@@ -1,3 +1,6 @@
+// Añadir dias festivos DONE
+// Añadir nombre del mes completo DONE
+
 // Set conjunto de días marcados
 // Get conjunto de días marcados
 
@@ -5,3 +8,5 @@
 
 // Vistas por año, mes, semana
 // Cambio entre vistas
+
+// Mejorar README y ejemplo de Codepen
