@@ -11,7 +11,7 @@ import { LitElement, html, css } from 'lit-element';
  */
 
 class MarkedCalendar extends LitElement {
-  static get is() { 
+  static get is() {
     return 'marked-calendar';
   }
 
@@ -19,7 +19,7 @@ class MarkedCalendar extends LitElement {
     return {
       lang: { type: String },
       year: { type: Number },
-      title: { type: String },
+      name: { type: String },
       savedata: { type: Boolean },
       weekends: { type: Boolean },
       options: { type: String }, // stringify of an array
@@ -185,30 +185,30 @@ class MarkedCalendar extends LitElement {
     this.savedata = false;
     this.weekends = false;
     this.COLORS = {
-      0: { code: '#FFFFFF', label: 'X'},
-      1: { code: '#2DE1C2', label: '😃' },
-      2: { code: '#01BAEF', label: '😊' },
-      3: { code: '#AFBFC0', label: '😐' },
-      4: { code: '#037171', label: '😞' },
-      5: { code: '#305654', label: '😭' }
+      0: { code: '#FFFFFF', label: 'X', title: 'delete' },
+      1: { code: '#2DE1C2', label: '😃', title: 'very-happy' },
+      2: { code: '#01BAEF', label: '😊', title: 'happy' },
+      3: { code: '#AFBFC0', label: '😐', title: 'neutral' },
+      4: { code: '#037171', label: '😞', title: 'sad' },
+      5: { code: '#305654', label: '😭', title: 'very-sad' }
     };
     this.options = '';
     this.holidays = '';
     this.arrHolidays = [];
     this.MONTH_LETTERS = {
-      "sp": [
-        { "letter": "E", "name": "Enero" },
-        { "letter": "F", "name": "Febrero" },
-        { "letter": "M", "name": "Marzo" },
-        { "letter": "A", "name": "Abril" },
-        { "letter": "M", "name": "Mayo" },
-        { "letter": "J", "name": "Junio" },
-        { "letter": "J", "name": "Julio" },
-        { "letter": "A", "name": "Agosto" },
-        { "letter": "S", "name": "Septiembre" },
-        { "letter": "O", "name": "Octubre" },
-        { "letter": "N", "name": "Noviembre" },
-        { "letter": "D", "name": "Diciembre" }
+      sp: [
+        { letter: 'E', name: 'Enero' },
+        { letter: 'F', name: 'Febrero' },
+        { letter: 'M', name: 'Marzo' },
+        { letter: 'A', name: 'Abril' },
+        { letter: 'M', name: 'Mayo' },
+        { letter: 'J', name: 'Junio' },
+        { letter: 'J', name: 'Julio' },
+        { letter: 'A', name: 'Agosto' },
+        { letter: 'S', name: 'Septiembre' },
+        { letter: 'O', name: 'Octubre' },
+        { letter: 'N', name: 'Noviembre' },
+        { letter: 'D', name: 'Diciembre' }
       ]
     };
     this.selectedMood = null;
@@ -235,7 +235,7 @@ class MarkedCalendar extends LitElement {
       let mood = document.createElement('div');
       let color = document.createElement('span');
 
-      color.style.background = this.getGradient(this.COLORS[e].code);
+      color.style.background = this._getGradient(this.COLORS[e].code);
 
 
       mood.setAttribute('mood', e);
@@ -249,6 +249,25 @@ class MarkedCalendar extends LitElement {
     });
   }
 
+  setMarkedDays() {
+
+  }
+
+  getMarkedDays() {
+    let markedDays = [];
+    let year = this._getCurrentLSStructure();
+    for (let month in year) {
+      if (year.hasOwnProperty(month)) {
+        for (let day in year[month]) {
+          if (year[month].hasOwnProperty(month) && year[month][day]) {
+            markedDays.push({day: (Number(day) + 1) + '/' + (Number(month) + 1), value: year[month][day]});
+          }
+        }
+      }
+    }
+    return markedDays;
+  }
+
   checkLocalStorage() {
     if (window.localStorage['structure' + this.year] === undefined) {
       let structure = this.generateDataStructure();
@@ -259,7 +278,7 @@ class MarkedCalendar extends LitElement {
   generateDataStructure() {
     let data = {};
     for (let i = 0; i < 12; i++) {
-      data[i] = Array.from({ length: this.getDaysFromMonth(i + 1) }, () => null);
+      data[i] = Array.from({ length: this._getDaysFromMonth(i + 1) }, () => null);
     }
     return data;
   }
@@ -275,7 +294,7 @@ class MarkedCalendar extends LitElement {
   }
 
   setDayStyle(month, monthContainer) {
-    const data = this.getCurrentLSStructure();
+    const data = this._getCurrentLSStructure();
     let days = Object.keys(data[month]);
     let holidays = (this.arrHolidays.length > 0);
     let noHolidays = true;
@@ -283,9 +302,8 @@ class MarkedCalendar extends LitElement {
     days.forEach(day => {
       let dayContainer = document.createElement('div');
       dayContainer.className = 'dayContainer';
-      
       if (data[month][day]) {
-        dayContainer.style.background = this.getGradient(this.COLORS[data[month][day]].code);
+        dayContainer.style.background = this._getGradient(this.COLORS[data[month][day]].code);
         dayContainer.title = this.COLORS[data[month][day]].label;
       }
       if (this.weekends) {
@@ -304,7 +322,7 @@ class MarkedCalendar extends LitElement {
   }
 
   createMonths() {
-    const data = this.getCurrentLSStructure();
+    const data = this._getCurrentLSStructure();
     const months = Object.keys(data);
     months.forEach(month => {
       let monthContainer = document.createElement('div');
@@ -354,11 +372,11 @@ class MarkedCalendar extends LitElement {
   }
 
   assignMood(month, day, item, e) {
-    let data = this.getCurrentLSStructure();
+    let data = this._getCurrentLSStructure();
     data[month][day] = this.selectedMood;
 
     if (this.selectedMood) {
-      item.style.background = this.getGradient(this.COLORS[this.selectedMood].code);
+      item.style.background = this._getGradient(this.COLORS[this.selectedMood].code);
       item.title = this.COLORS[this.selectedMood].label;
       let settingCalenderEvent = new CustomEvent('setting-calendarItem', { detail: {year: this.year, month: month, day: day, mood: this.selectedMood} });
       this.dispatchEvent(settingCalenderEvent);
@@ -376,28 +394,28 @@ class MarkedCalendar extends LitElement {
     let h = this.NOTICE_LAYER.offsetHeight;
     this.NOTICE_LAYER.style.top = (e.pageY - h / 2) + 'px';
     this.NOTICE_LAYER.style.left = (e.pageX - w / 2) + 'px';
-    setTimeout(() =>{ 
+    setTimeout(() => {
       this.NOTICE_LAYER.style.display = 'none';
     }, 1000);
   }
 
-  getDaysFromMonth(month) {
+  _getDaysFromMonth(month) {
     return new Date(this.year, month, 0).getDate();
   }
 
-  getCurrentLSStructure() {
-    return JSON.parse(window.localStorage['structure'+this.year]);
+  _getCurrentLSStructure() {
+    return JSON.parse(window.localStorage['structure' + this.year]);
   }
 
-  getGradient(colorId) {
+  _getGradient(colorId) {
     return `radial-gradient(ellipse at center, rgba(255,255,255,.1) -95%, ${colorId} 100%)`;
   }
 
-  updated() {    
+  updated() {
     this.GUIDES.addEventListener('click', e => {
       if (e.target.attributes[0].value >= 0) {
         this.selectedMood = e.target.attributes[0].value;
-        this.SELECTED_MOOD.style.background = this.getGradient(this.COLORS[this.selectedMood].code);
+        this.SELECTED_MOOD.style.background = this._getGradient(this.COLORS[this.selectedMood].code);
       }
     });
   }
@@ -406,8 +424,12 @@ class MarkedCalendar extends LitElement {
     if (this.options !== '') {
       let opts = JSON.parse(this.options);
       opts.unshift(['#FFFFFF', 'X']);
-      this.COLORS = Object.assign({}, opts.map((opt) => { 
-        return {'code': opt[0], 'label': opt[1], 'title': opt[2] } 
+      this.COLORS = Object.assign({}, opts.map((opt) => {
+        return {
+          'code': opt[0],
+          'label': opt[1],
+          'title': opt[2]
+        };
       }));
     }
   }
