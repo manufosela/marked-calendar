@@ -38,6 +38,8 @@ class MarkedCalendar extends LitElement {
           -moz-user-select: none;
             -ms-user-select: none;
                 user-select: none;
+
+        --cellSize: 1.25em;
       }
 
       .title {
@@ -80,7 +82,7 @@ class MarkedCalendar extends LitElement {
       #moods div {
         position: relative;
         margin: 0 1em;
-        padding-left: 1.25em;
+        padding-left: var(--cellSize);
       }
       #moods div span {
         position: absolute;
@@ -106,15 +108,15 @@ class MarkedCalendar extends LitElement {
       }
 
       #daysHeader {
-        margin-left: 1.25em;
+        margin-left: var(--cellSize);
         margin-bottom: 0;
         margin-top: 1em;
       }
 
       .monthHeader,
       .dayHeader {
-        width: 1.25em;
-        height: 1.25em;
+        width: var(--cellSize);
+        height: var(--cellSize);
         font-size: 1rem;
         padding: 1px 0 0 1px;
         text-align: center;
@@ -129,10 +131,14 @@ class MarkedCalendar extends LitElement {
       .monthContainer:hover {
         cursor: pointer;
       }
+      .monthLetterBtn {
+        width:var(--cellSize);
+        padding:0;
+      }
 
       .dayContainer {
-        width: 1.25em;
-        height: 1.25em;
+        width: var(--cellSize);
+        height: var(--cellSize);
         border: 1px solid #dfe8ea;
         margin-right: -1px;
         margin-bottom: -1px;
@@ -302,7 +308,6 @@ class MarkedCalendar extends LitElement {
 
       color.style.background = this._getGradient(this.COLORS[e].code);
 
-
       mood.setAttribute('mood', e);
       color.setAttribute('mood', e);
 
@@ -412,15 +417,16 @@ class MarkedCalendar extends LitElement {
     };
     if (this.changeView) {
       this.shadowRoot.querySelector('#changeViewBtn').onclick = (e) => {
-        this.view = (this.view === 'month') ? '' : 'month';
-
+        this.view = '';
         this.generateVisualStructure();
       };
     }
   }
 
   drawMonthHeaderBar(month) {
-    this.MAIN_CONTAINER.innerHTML = '';
+    this.MAIN_CONTAINER.textContent = '';;
+    this.MONTH_HEADER.textContent = '';
+    this.DAYS_HEADER.textContent = '';
     this.MAIN_CONTAINER.className = 'monthMainContainer';
     let monthHeaderBar = document.createElement('div');
     monthHeaderBar.innerHTML = `
@@ -445,6 +451,7 @@ class MarkedCalendar extends LitElement {
   }
 
   drawMonth(month) {
+    month = Number(month);
     const data = this._getCurrentLSStructure();
     const firstDay = new Date((month + 1) + '/1/' + this.year).getDay();
     const lastDay = new Date(this.year, (month + 1), 0).getDate();
@@ -472,28 +479,36 @@ class MarkedCalendar extends LitElement {
   createMonths() {
     const data = this._getCurrentLSStructure();
     const months = Object.keys(data);
-    this.MAIN_CONTAINER.innerHTML = '';
+    this.MAIN_CONTAINER.textContent = '';
     this.MAIN_CONTAINER.className = 'yearMainContainer';
     months.forEach(month => {
       let monthContainer = document.createElement('div');
       monthContainer.className = 'monthContainer';
       let monthHeader = document.createElement('div');
       monthHeader.className = 'monthHeader';
-      monthHeader.textContent = this.MONTH_LETTERS[this.lang][month].letter;
-      monthHeader.title = this.MONTH_LETTERS[this.lang][month].name;
+      let letter = this.MONTH_LETTERS[this.lang][month].letter;
+      let name = this.MONTH_LETTERS[this.lang][month].name;
+      monthHeader.innerHTML = `<button id="month_${name}" class="monthLetterBtn" title="${name}" data-monthnum="${month}">${letter}</button>`;
+      monthHeader.title = name;
 
       this.setDayStyle(month, monthContainer);
 
       this.MONTH_HEADER.appendChild(monthHeader);
       this.MAIN_CONTAINER.appendChild(monthContainer);
+      this.shadowRoot.querySelector('#month_' + name).onclick = (e) => {
+        let m = e.target.dataset.monthnum;
+        this.changeView = 'month';
+        this.createWeeks(m);
+      };
     });
   }
 
   generateVisualStructure() {
     const dayHeaderLength = 31;
-    let month = new Date().getMonth();
+    let month;
     switch (this.view) {
       case 'month':
+        month = new Date().getMonth();
         this.createWeeks(month);
         break;
       default:
