@@ -21,8 +21,9 @@ class MarkedCalendar extends LitElement {
       view: { type: String },
       YEAR: { type: Number, attribute: 'year' },
       name: { type: String },
-      savedata: { type: Boolean },
+      saveData: { type: Boolean, attribute: 'save-data' },
       weekends: { type: Boolean },
+      changeView: { type: Boolean, attribute: 'change-view' },
       options: { type: String }, // stringify of an array
       holidays: { type: String } // stringify of an array
     };
@@ -174,12 +175,12 @@ class MarkedCalendar extends LitElement {
         display:flex;
       }
       .monthMainContainer .monthBar button {
-        margin:0 3rem;
+        margin:0 1rem;
       }
       .monthMainContainer .monthBar .monthTitle {
         width:200px;
       }
-
+      #changeViewBtn { width:7rem; }
 
 
 
@@ -234,7 +235,8 @@ class MarkedCalendar extends LitElement {
     this.lang = 'sp';
     this.YEAR = 2019;
     this.year = this.YEAR;
-    this.savedata = false;
+    this.saveData = false;
+    this.changeView = false;
     this.weekends = false;
     this.COLORS = {
       0: { code: '#FFFFFF', label: 'X', title: 'delete' },
@@ -393,25 +395,61 @@ class MarkedCalendar extends LitElement {
     });
   }
 
-  createWeeks(month) {
-    this.checkLocalStorage();
-    const data = this._getCurrentLSStructure();
-    const lastDay = new Date(this.year, (month + 1), 0).getDate();
-    let counterDay = 0;
-    const firstDay = new Date((month + 1) + '/1/' + this.year).getDay();
-    const firstDayOfWeek = (firstDay === 0) ? 7 : firstDay;
+  addBtnEventsMonthHeadearBar(month) {
+    this.shadowRoot.querySelector('#lastMonthBtn').onclick = (e) => {
+      if (month === 0) {
+        month = 12;
+        this.year--;
+      }
+      this.createWeeks(month - 1);
+    };
+    this.shadowRoot.querySelector('#nextMonthBtn').onclick = (e) => {
+      if (month === 11) {
+        month = -1;
+        this.year++;
+      }
+      this.createWeeks(month + 1);
+    };
+    if (this.changeView) {
+      this.shadowRoot.querySelector('#changeViewBtn').onclick = (e) => {
+        this.view = (this.view === 'month') ? '' : 'month';
+
+        this.generateVisualStructure();
+      };
+    }
+  }
+
+  drawMonthHeaderBar(month) {
     this.MAIN_CONTAINER.innerHTML = '';
     this.MAIN_CONTAINER.className = 'monthMainContainer';
-    let monthNameContainer = document.createElement('div');
-    monthNameContainer.innerHTML = '<div class="monthBar"><button id="lastMonthBtn"><</button><div class="monthTitle">' + this.MONTH_LETTERS.sp[month].name + '</div><button id="nextMonthBtn">></button></div>';
-    monthNameContainer.className = 'monthname';
-    this.MAIN_CONTAINER.appendChild(monthNameContainer);
+    let monthHeaderBar = document.createElement('div');
+    monthHeaderBar.innerHTML = `
+      <div class="monthBar">
+        <button id="lastMonthBtn"><</button>
+        <div class="monthTitle">${this.MONTH_LETTERS.sp[month].name}</div>
+        <button id="nextMonthBtn">></button>
+        ${(this.changeView) ? '<button id="changeViewBtn">Vista Año</button>' : ''}
+      </div>`;
+    monthHeaderBar.className = 'monthname';
+    this.MAIN_CONTAINER.appendChild(monthHeaderBar);
+    this.addBtnEventsMonthHeadearBar(month);
+  }
+
+  drawDayOfTheWeeksHeader() {
     for (let i = 0; i < 7; i++) {
       let weekDayContainer = document.createElement('span');
       weekDayContainer.className = 'dayofweek';
       weekDayContainer.textContent = this.DAYOFWEEK_LETTER.sp[i].letter;
       this.MAIN_CONTAINER.appendChild(weekDayContainer);
     }
+  }
+
+  drawMonth(month) {
+    const data = this._getCurrentLSStructure();
+    const firstDay = new Date((month + 1) + '/1/' + this.year).getDay();
+    const lastDay = new Date(this.year, (month + 1), 0).getDate();
+    const firstDayOfWeek = (firstDay === 0) ? 7 : firstDay;
+    let counterDay = 0;
     for (let i = 1; i <= 42; i++) {
       let weekDayContainer = document.createElement('span');
       if (i >= firstDayOfWeek && counterDay < lastDay) {
@@ -422,25 +460,19 @@ class MarkedCalendar extends LitElement {
       }
       this.MAIN_CONTAINER.appendChild(weekDayContainer);
     }
-    this.shadowRoot.querySelector('#lastMonthBtn').onclick = function() {
-      if (month === 0) {
-        month = 12;
-        this.year--;
-      }
-      this.createWeeks(month - 1);
-    }.bind(this);
-    this.shadowRoot.querySelector('#nextMonthBtn').onclick = function() {
-      if (month === 11) {
-        month = -1;
-        this.year++;
-      }
-      this.createWeeks(month + 1);
-    }.bind(this);
+  }
+
+  createWeeks(month) {
+    this.checkLocalStorage();
+    this.drawMonthHeaderBar(month);
+    this.drawDayOfTheWeeksHeader();
+    this.drawMonth(month);
   }
 
   createMonths() {
     const data = this._getCurrentLSStructure();
     const months = Object.keys(data);
+    this.MAIN_CONTAINER.innerHTML = '';
     this.MAIN_CONTAINER.className = 'yearMainContainer';
     months.forEach(month => {
       let monthContainer = document.createElement('div');
@@ -488,7 +520,7 @@ class MarkedCalendar extends LitElement {
     let y = this.year;
     this.arrHolidays.forEach(dayHoliday => {
       if (dayHoliday.date === d + '/' + m  && this.year === this.YEAR ||
-      dayHoliday.date === d + '/' + m + '/' + this.year && this.year === this.YEAR + 1) {
+          dayHoliday.date === d + '/' + m + '/' + this.year && this.year === this.YEAR + 1) {
         dayContainer.style.background = '#999';
         dayContainer.style.cursor = 'not-allowed';
         dayContainer.title = dayHoliday.title;
@@ -507,7 +539,7 @@ class MarkedCalendar extends LitElement {
       item.title = this.COLORS[this.selectedMood].label;
       let settingCalenderEvent = new CustomEvent('setting-calendarItem', { detail: {year: this.year, month: month, day: day, mood: this.selectedMood} });
       this.dispatchEvent(settingCalenderEvent);
-      if (this.savedata) {
+      if (this.saveData) {
         localStorage.setItem('structure' + this.year, JSON.stringify(data));
       }
     } else {
