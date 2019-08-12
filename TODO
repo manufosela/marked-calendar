@@ -1,15 +1,18 @@
 // Añadir dias festivos DONE
 // Añadir nombre del mes completo DONE
-
-// Set conjunto de días marcados
 // Get conjunto de días marcados DONE
-
-// Set por atributo y método de diás festivos
-
 // Vistas por año, mes, semana DONE
 // Vista mes con clicks DONE
 // Cambio de vista mes a vista año DONE
 // Cambio de vista año a vista mes DONE
-// media Querys para vista mes
+// media Querys para vista mes DONE
 
-// Mejorar README y ejemplo de Codepen
+
+// Set conjunto de días marcados DONE
+// Set por método de diás festivos
+
+
+// PARA FINALIZAR:
+// Mejorar README. Ejemplos desde lo mas sencillo a lo mas complejo
+// Mejorar info de la demo
+// Mejorar ejemplo de Codepen

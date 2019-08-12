@@ -24,7 +24,7 @@ class MarkedCalendar extends LitElement {
       saveData: { type: Boolean, attribute: 'save-data' },
       weekends: { type: Boolean },
       changeView: { type: Boolean, attribute: 'change-view' },
-      options: { type: String }, // stringify of an array
+      legend: { type: String }, // stringify of an array
       holidays: { type: String } // stringify of an array
     };
   }
@@ -69,22 +69,26 @@ class MarkedCalendar extends LitElement {
       #guide:hover {
         cursor: pointer;
       }
-      #guide #selectedMood span {
+      #guide #selectedState span {
         width: 1em;
         height: 1em;
         display: inline-block;
         vertical-align: middle;
       }
 
-      #moods {
+      #states {
         display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+        width: 25rem;
       }
-      #moods div {
+      #states div {
         position: relative;
-        margin: 0 1em;
+        margin: 5px 1em;
         padding-left: var(--cellSize);
+        width: 2em;
       }
-      #moods div span {
+      #states div span {
         position: absolute;
         left: 0;
         top: 0.25em;
@@ -197,6 +201,7 @@ class MarkedCalendar extends LitElement {
         .content {
           display: flex;
           justify-content: center;
+          --cellSize: 1em;
         }
 
         .yearMainContainer {
@@ -218,7 +223,7 @@ class MarkedCalendar extends LitElement {
           display: inline-flex;
           flex-direction: row;
           justify-content: center;
-          width: 100%;
+          width: 90%;
         }
 
         .yearMainContainer,
@@ -244,7 +249,7 @@ class MarkedCalendar extends LitElement {
     this.saveData = false;
     this.changeView = false;
     this.weekends = false;
-    this.COLORS = {
+    this.LEGEND = {
       0: { code: '#FFFFFF', label: 'X', title: 'delete' },
       1: { code: '#2DE1C2', label: '😃', title: 'very-happy' },
       2: { code: '#01BAEF', label: '😊', title: 'happy' },
@@ -252,7 +257,7 @@ class MarkedCalendar extends LitElement {
       4: { code: '#037171', label: '😞', title: 'sad' },
       5: { code: '#305654', label: '😭', title: 'very-sad' }
     };
-    this.options = '';
+    this.legend = '';
     this.holidays = '';
     this.arrHolidays = [];
     this.MONTH_LETTERS = {
@@ -282,47 +287,44 @@ class MarkedCalendar extends LitElement {
         { letter: 'D', name: 'Domingo' }
       ]
     };
-    this.selectedMood = null;
+    this.selectedState = null;
   }
 
   connectedCallback() {
     super.connectedCallback();
-    document.addEventListener('confirm-dataItem', this.confirmDataItem);
-    document.addEventListener('confirm-item', this.confirmItem);
   }
 
-  confirmDataItem(e) {
-    console.log(e.details);
-  }
-
-  confirmItem(e) {
-    console.log(e.details);
-  }
-
-  setMoods() {
-    let colorKeys = Object.keys(this.COLORS);
+  setStates() {
+    let colorKeys = Object.keys(this.LEGEND);
 
     colorKeys.forEach(e => {
-      let mood = document.createElement('div');
+      let state = document.createElement('div');
       let color = document.createElement('span');
 
-      color.style.background = this._getGradient(this.COLORS[e].code);
+      color.style.background = this._getGradient(this.LEGEND[e].code);
 
-      mood.setAttribute('mood', e);
-      color.setAttribute('mood', e);
+      state.setAttribute('state', e);
+      color.setAttribute('state', e);
 
-      mood.textContent += this.COLORS[e].label;
-      mood.title = this.COLORS[e].title;
-      mood.appendChild(color);
+      state.textContent += this.LEGEND[e].label;
+      state.title = this.LEGEND[e].title;
+      state.appendChild(color);
 
-      this.MOODS.appendChild(mood);
+      this.MOODS.appendChild(state);
     });
   }
 
   setMarkedDays(markedDays) {
+    markedDays = (typeof markedDays === 'string') ? JSON.parse(markedDays) : markedDays;
     markedDays.forEach(el => {
-
-      // Por hacer
+      let dayVal = el.day.split('/');
+      let day = dayVal[0] - 1;
+      let month = dayVal[1] - 1;
+      let val = el.value;
+      let year = this._getCurrentLSStructure();
+      year[month][day] = val;
+      this._setCurrentLSStructure(year);
+      this.generateVisualStructure();
     });
   }
 
@@ -374,8 +376,8 @@ class MarkedCalendar extends LitElement {
     let holidays = (this.arrHolidays.length > 0);
     dayContainer.className = 'dayContainer';
     if (dataMonthDay) {
-      dayContainer.style.background = this._getGradient(this.COLORS[dataMonthDay].code);
-      dayContainer.title = this.COLORS[dataMonthDay].label;
+      dayContainer.style.background = this._getGradient(this.LEGEND[dataMonthDay].code);
+      dayContainer.title = this.LEGEND[dataMonthDay].label;
     }
     if (this.weekends) {
       [dayContainer, noWeekend] = this.drawIsWeekend(dayContainer, month, day);
@@ -385,7 +387,7 @@ class MarkedCalendar extends LitElement {
     }
     if (noHolidays && noWeekend && noLimits) {
       dayContainer.onclick = (e) => {
-        this.assignMood(month, day, dayContainer, e);
+        this.assignState(month, day, dayContainer, e);
       };
     }
     return dayContainer;
@@ -424,7 +426,8 @@ class MarkedCalendar extends LitElement {
   }
 
   drawMonthHeaderBar(month) {
-    this.MAIN_CONTAINER.textContent = '';;
+    month = Number(month);
+    this.MAIN_CONTAINER.textContent = '';
     this.MONTH_HEADER.textContent = '';
     this.DAYS_HEADER.textContent = '';
     this.MAIN_CONTAINER.className = 'monthMainContainer';
@@ -545,14 +548,14 @@ class MarkedCalendar extends LitElement {
     return [dayContainer, noHolidays];
   }
 
-  assignMood(month, day, item, e) {
+  assignState(month, day, item, e) {
     let data = this._getCurrentLSStructure();
-    data[month][day] = this.selectedMood;
+    data[month][day] = (this.selectedState === '0') ? null : this.selectedState;
 
-    if (this.selectedMood) {
-      item.style.background = this._getGradient(this.COLORS[this.selectedMood].code);
-      item.title = this.COLORS[this.selectedMood].label;
-      let settingCalenderEvent = new CustomEvent('setting-calendarItem', { detail: {year: this.year, month: month, day: day, mood: this.selectedMood} });
+    if (this.selectedState) {
+      item.style.background = this._getGradient(this.LEGEND[this.selectedState].code);
+      item.title = this.LEGEND[this.selectedState].label;
+      let settingCalenderEvent = new CustomEvent('setting-calendarItem', { detail: {year: this.year, month: month, day: day, state: this.selectedState} });
       this.dispatchEvent(settingCalenderEvent);
       if (this.saveData) {
         localStorage.setItem('structure' + this.year, JSON.stringify(data));
@@ -581,6 +584,10 @@ class MarkedCalendar extends LitElement {
     return JSON.parse(window.localStorage['structure' + this.year]);
   }
 
+  _setCurrentLSStructure(data) {
+    localStorage.setItem('structure' + this.year, JSON.stringify(data));
+  }
+
   _getGradient(colorId) {
     return `radial-gradient(ellipse at center, rgba(255,255,255,.1) -95%, ${colorId} 100%)`;
   }
@@ -588,23 +595,16 @@ class MarkedCalendar extends LitElement {
   updated() {
     this.GUIDES.addEventListener('click', e => {
       if (e.target.attributes[0].value >= 0) {
-        this.selectedMood = e.target.attributes[0].value;
-        this.SELECTED_MOOD.style.background = this._getGradient(this.COLORS[this.selectedMood].code);
+        this.selectedState = e.target.attributes[0].value;
+        this.SELECTED_MOOD.style.background = this._getGradient(this.LEGEND[this.selectedState].code);
       }
     });
   }
 
-  _setCOLORSwithOptions() {
-    if (this.options !== '') {
-      let opts = JSON.parse(this.options);
-      opts.unshift(['#FFFFFF', 'X']);
-      this.COLORS = Object.assign({}, opts.map((opt) => {
-        return {
-          'code': opt[0],
-          'label': opt[1],
-          'title': opt[2]
-        };
-      }));
+  _defineLEGEND() {
+    if (this.legend !== '') {
+      this.LEGEND = JSON.parse(this.legend);
+      this.LEGEND.unshift({code: '#FFFFFF', label: 'X', title: 'borrar'});
     }
   }
 
@@ -614,30 +614,34 @@ class MarkedCalendar extends LitElement {
     }
   }
 
+  init() {
+    this.checkLocalStorage();
+    this.generateVisualStructure();
+    this.setStates();
+  }
+
   firstUpdated() {
     this.name = this.name || html`Year in pixels`;
-    this._setCOLORSwithOptions();
+    this._defineLEGEND();
     this._setArrHolidays();
     this.MAIN_CONTAINER = this.shadowRoot.querySelector('#mainContainer');
     this.DAYS_HEADER = this.shadowRoot.querySelector('#daysHeader');
     this.MONTH_HEADER = this.shadowRoot.querySelector('#monthHeader');
     this.GUIDES = this.shadowRoot.querySelector('#guide');
     this.GUIDES = this.shadowRoot.querySelector('#guide');
-    this.SELECTED_MOOD = this.shadowRoot.querySelector('#selectedMood span');
-    this.MOODS = this.shadowRoot.querySelector('#moods');
+    this.SELECTED_MOOD = this.shadowRoot.querySelector('#selectedState span');
+    this.MOODS = this.shadowRoot.querySelector('#states');
     this.NOTICE_LAYER = this.renderRoot.querySelector('#notice');
-    this.checkLocalStorage();
-    this.generateVisualStructure();
-    this.setMoods();
-    this.renderRoot.querySelector('div [mood="0"] span').style.border = '1px solid black';
+    this.init();
+    this.renderRoot.querySelector('div [state="0"] span').style.border = '1px solid black';
   }
 
   render() {
     return html`
       <h1 class="title">${this.name} (${this.year})</h1>
       <div id="guide">
-        <div id="selectedMood">Selected option: <span></span></div>
-        <div id="moods"></div>
+        <div id="selectedState">Selected option: <span></span></div>
+        <div id="states"></div>
       </div>
       <div class="content">
         <div id="daysHeader"></div>
