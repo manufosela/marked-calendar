@@ -8,12 +8,12 @@
     <style>
       .blocks {
         display:flex;
-        display-direction:row;
+        flex-direction:row;
         flex-wrap: wrap;
       }
       .block {
         display:flex;
-        display-direction:column;
+        flex-direction:column;
         flex-wrap: wrap;
         white-space: normal;
       }
@@ -34,7 +34,7 @@
       <div class="blocks">
         <pre class="block code">
           <code>
-            &lt;marked-calendar year="2019" title="Imputacion de horas" weekends options=[["#0F0","V"],["#F00","A"],["#00F","T"],["#F90","E"]]&gt;&lt;/marked-calendar&gt;
+            &lt;marked-calendar year="2019" title="Imputacion de horas" weekends&gt;&lt;/marked-calendar&gt;
           </code>
         </pre>
         <pre class="block attributes">
@@ -42,17 +42,20 @@
           <ul>
             <li>year (Number)</li>
             <li>title (String)</li>
-            <li>savedata (Boolean)</li>
+            <li>save-data (Boolean)</li>
             <li>weekends (Boolean)</li>
+            <li>change-view (Boolean)</li>
             <li>legend (Array Stringify)</li>
           </ul>
         </pre>
       </div>
 
       <marked-calendar 
-        year="2019" 
         name="Imputacion de horas"
-        save-data weekends change-view
+        weekends
+        change-view
+        save-data
+        view='month'
         legend='[
           {"code": "#0F0", "label": "V",  "title": "Vacaciones"},
           {"code": "#FF0", "label": "LD", "title": "Libre Disposición"},
@@ -63,21 +66,23 @@
           {"code": "#0FF", "label": "CD", "title": "Dia de la Capacidad"} ]'
         holidays='[
           {"title": "Año nuevo", "date": "1/1"},
-          {"title": "Dia de Reyes", "date": "7/1"},
-          {"title": "Jueves Santo", "date": "18/4"},
-          {"title": "Viernes Santo", "date": "19/4"},
+          {"title": "Dia de Reyes", "date": "6/1"},
+          {"title": "Jueves Santo", "date": "9/4"},
+          {"title": "Viernes Santo", "date": "10/4"},
           {"title": "Día del trabajador", "date": "1/5"},
           {"title": "Día de la comunidad de Madrid", "date":"2/5"}, 
+          {"title": "San Isidro", "date":"15/5"}, 
           {"title": "Día de la Asunción de la Virgen", "date": "15/8"}, 
-          {"title": "Día de todos los santos", "date": "1/11"},
+          {"title": "Día de todos los santos (pasado del domingo)", "date": "2/11"},
+          {"title": "Día de la Almudena", "date":"9/11"}, 
           {"title": "Día de la constitución", "date": "6/12"},
           {"title": "Día de la Inmaculada Concepción", "date": "9/12"},
           {"title": "Festivo en Kairós", "date": "24/12"},
           {"title": "Navidad", "date": "25/12"},
           {"title": "Festivo en Kairós", "date": "31/12"},
-          {"title": "Año Nuevo", "date": "1/1/2020"},
-          {"title": "Día de Reyes", "date": "6/1/2020"} ]'
-        view='month'>
+          {"title": "Año Nuevo", "date": "1/1/2021"},
+          {"title": "Día de Reyes", "date": "6/1/2021"} ]'
+        >
       </marked-calendar>
     </div>
   </body>
