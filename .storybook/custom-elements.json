@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "tags": [
+    {
+      "name": "marked-calendar",
+      "properties": [
+        {
+          "name": "lang",
+          "type": "String",
+          "description": "Language used to show Months and Day of the week. Available sp (SPAINISH) and en (ENGLISH)"
+        },
+        {
+          "name": "view",
+          "type": "String",
+          "description": ""
+        },
+        {
+          "name": "year",
+          "type": "Number",
+          "description": ""
+        },
+        {
+          "name": "name",
+          "type": "String",
+          "description": ""
+        },
+        {
+          "name": "saveData",
+          "type": "Boolean",
+          "description": ""
+        },
+        {
+          "name": "weekends",
+          "type": "Boolean",
+          "description": ""
+        },
+        {
+          "name": "changeView",
+          "type": "Boolean",
+          "description": ""
+        },
+        {
+          "name": "legend",
+          "type": "String",
+          "description": ""
+        },
+        {
+          "name": "holidays",
+          "type": "String",
+          "description": ""
+        }
+      ],
+      "events": [],
+      "slots": [],
+      "cssProperties": []
+    }
+  ]
+}
