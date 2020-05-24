@@ -1,3 +1,4 @@
+/* eslint-disable no-bitwise */
 import { LitElement, html, css } from 'lit-element';
 
 /**
@@ -67,6 +68,8 @@ class MarkedCalendar extends LitElement {
 
       #guide {
         display: flex;
+        flex-direction: column;
+        align-items: center;
         justify-content: center;
         font-weight: bold;
         margin: 1em 0;
@@ -89,9 +92,9 @@ class MarkedCalendar extends LitElement {
 
       #states {
         display: flex;
-        width: 100%;
+        flex-direction: row;
         flex-wrap: wrap;
-        width: 25rem;
+        max-width:22rem;
       }
       #states div {
         position: relative;
@@ -105,6 +108,9 @@ class MarkedCalendar extends LitElement {
         top: 0.25em;
         width: 1em;
         height: 1em;
+      }
+      .typeselected {
+        border:3px inset !important;
       }
 
       /* Vista AÑO */
@@ -261,8 +267,6 @@ class MarkedCalendar extends LitElement {
         }
 
         #guide {
-          flex-direction: column;
-          align-items: center;
           font-size:1rem;
         }
         #states {
@@ -324,6 +328,8 @@ class MarkedCalendar extends LitElement {
     };
     this.selectedState = null;
     this.DAYHEADERLENGTH = 31;
+    this.id = this.id || this._createUUID();
+    this.structureName = `marked-calendar-${this.id}`;
 
     this._selectLegendType = this._selectLegendType.bind(this);
     this._changeToViewMonth = this._changeToViewMonth.bind(this);
@@ -337,6 +343,21 @@ class MarkedCalendar extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.YEAR = this.year;
+  }
+
+  getArrDaysByMonth() {
+    const febDays = ((this.year % 4 === 0 && this.year % 100 !== 0) || this.year % 400 === 0) ? 29 : 28;
+    return [31, febDays, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  }
+
+  _createUUID() {
+    var dt = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = (dt + Math.random() * 16) % 16 | 0;
+      dt = Math.floor(dt / 16);
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+    return uuid;
   }
 
   setStates() {
@@ -366,7 +387,8 @@ class MarkedCalendar extends LitElement {
       let day = dayVal[0] - 1;
       let month = dayVal[1] - 1;
       let val = el.value;
-      let year = this._getCurrentLSStructure();
+      const structure = this._getCurrentLSStructure();
+      const year = structure[this.year];
       year[month][day] = val;
       this._setCurrentLSStructure(year);
       this.generateVisualStructure();
@@ -375,7 +397,8 @@ class MarkedCalendar extends LitElement {
 
   getMarkedDays() {
     let markedDays = [];
-    let year = this._getCurrentLSStructure();
+    const structure = this._getCurrentLSStructure();
+    const year = structure[this.year];
     for (let month in year) {
       if (Object.prototype.hasOwnProperty.call(year, month)) {
         for (let day in year[month]) {
@@ -389,16 +412,17 @@ class MarkedCalendar extends LitElement {
   }
 
   checkLocalStorage() {
-    if (window.localStorage['structure' + this.year] === undefined) {
+    if (window.localStorage[this.structureName] === undefined) {
       let structure = this.generateDataStructure();
-      localStorage.setItem('structure' + this.year, JSON.stringify(structure));
+      localStorage.setItem(this.structureName, JSON.stringify(structure));
     }
   }
 
   generateDataStructure() {
     let data = {};
+    data[this.year] = {};
     for (let i = 0; i < 12; i++) {
-      data[i] = Array.from({ length: this._getDaysFromMonth(i + 1) }, () => null);
+      data[this.year][i] = {}; //Array.from({ length: this._getDaysFromMonth(i + 1) }, () => null);
     }
     return data;
   }
@@ -438,12 +462,14 @@ class MarkedCalendar extends LitElement {
   }
 
   setDayStyle(month, monthContainer) {
-    const data = this._getCurrentLSStructure();
-    let days = Object.keys(data[month]);
-    days.forEach(day => {
-      let dayContainer = this.setDayContent(data[month][day], month, day);
+    let structure = this._getCurrentLSStructure();
+    const data = structure[this.year];
+    const days = this.getArrDaysByMonth()[month];
+    for (let day = 0; day < days; day++) {
+      const content = (data[month][day]) ? data[month][day] : '';
+      const dayContainer = this.setDayContent(content, month, day);
       monthContainer.appendChild(dayContainer);
-    });
+    }
   }
 
   _decrementMonth(e) {
@@ -479,10 +505,10 @@ class MarkedCalendar extends LitElement {
 
   _decrementYear(e) {
     this.year--;
-    if (typeof window.localStorage['structure' + this.year] === 'undefined') {
+    if (typeof window.localStorage[this.structureName] === 'undefined') {
       if (this.saveData) {
         let structure = this.generateDataStructure();
-        localStorage.setItem('structure' + this.year, JSON.stringify(structure));
+        localStorage.setItem(this.structureName, JSON.stringify(structure));
       } else {
         this.year++;
         return;
@@ -495,10 +521,10 @@ class MarkedCalendar extends LitElement {
 
   _incrementYear(e) {
     this.year++;
-    if (typeof window.localStorage['structure' + this.year] === 'undefined') {
+    if (typeof window.localStorage[this.structureName] === 'undefined') {
       if (this.saveData) {
         let structure = this.generateDataStructure();
-        localStorage.setItem('structure' + this.year, JSON.stringify(structure));
+        localStorage.setItem(this.structureName, JSON.stringify(structure));
       } else {
         this.year--;
         return;
@@ -574,7 +600,8 @@ class MarkedCalendar extends LitElement {
 
   drawMonth(month) {
     month = Number(month);
-    const data = this._getCurrentLSStructure();
+    const structure = this._getCurrentLSStructure();
+    const data = structure[this.year];
     const firstDay = new Date((month + 1) + '/1/' + this.year).getDay();
     const lastDay = new Date(this.year, (month + 1), 0).getDate();
     const firstDayOfWeek = (firstDay === 0) ? 7 : firstDay;
@@ -607,8 +634,9 @@ class MarkedCalendar extends LitElement {
   }
 
   createMonths() {
-    const data = this._getCurrentLSStructure();
-    const months = Object.keys(data);
+    const structure = this._getCurrentLSStructure();
+    const data = structure[this.year];
+    const months = Object.keys(this.getArrDaysByMonth());
     this.MONTH_HEADER.textContent = '';
     this.MAIN_CONTAINER.textContent = '';
     this.MAIN_CONTAINER.className = 'yearMainContainer';
@@ -628,6 +656,7 @@ class MarkedCalendar extends LitElement {
       this.MAIN_CONTAINER.appendChild(monthContainer);
       this.shadowRoot.querySelector('#month_' + name).onclick = this._changeToViewMonth;
     });
+    this.MAIN_CONTAINER.onclick = this.setCellValue;
   }
 
   generateVisualStructure() {
@@ -673,11 +702,12 @@ class MarkedCalendar extends LitElement {
 
   assignState(month, day, e) {
     const item = e.target;
-    const noLimits = (this.year <= this.YEAR + 1 && month < 1) || (this.year === this.YEAR);
+    const noLimits = true; // (this.year <= this.YEAR + 1 && month < 1) || (this.year === this.YEAR);
     const noholidays = (item.dataset.noholidays === 'true');
     const noweekend = (item.dataset.noweekend === 'true');
     if (noholidays && noweekend && noLimits && this.saveData) {
-      const data = this._getCurrentLSStructure();
+      const structure = this._getCurrentLSStructure();
+      const data = structure[this.year];
       data[month][day] = (this.selectedState === '0') ? null : this.selectedState;
 
       if (this.selectedState) {
@@ -686,7 +716,8 @@ class MarkedCalendar extends LitElement {
         let settingCalenderEvent = new CustomEvent('setting-calendarItem', { detail: {year: this.year, month: month, day: day, state: this.selectedState} });
         this.dispatchEvent(settingCalenderEvent);
         if (this.saveData) {
-          localStorage.setItem('structure' + this.year, JSON.stringify(data));
+          structure[this.year] = data;
+          localStorage.setItem(this.structureName, JSON.stringify(structure));
         }
       } else {
         this.showNotice(e);
@@ -710,11 +741,17 @@ class MarkedCalendar extends LitElement {
   }
 
   _getCurrentLSStructure() {
-    return JSON.parse(window.localStorage['structure' + this.year]);
+    const structure = JSON.parse(window.localStorage[this.structureName]);
+    if (structure[this.year] === undefined) {
+      structure[this.year] = this.generateDataStructure()[this.year];
+    }
+    return structure;
   }
 
   _setCurrentLSStructure(data) {
-    localStorage.setItem('structure' + this.year, JSON.stringify(data));
+    const structure = this._getCurrentLSStructure();
+    structure[this.year] = data;
+    localStorage.setItem(this.structureName, JSON.stringify(structure));
   }
 
   _getGradient(colorId) {
@@ -723,8 +760,12 @@ class MarkedCalendar extends LitElement {
 
   _selectLegendType(e) {
     if (e.target.attributes[0].value >= 0) {
+      if (this.shadowRoot.querySelector('span[class="typeselected"]')) {
+        this.shadowRoot.querySelector('span[class="typeselected"]').classList.remove('typeselected');
+      }
       this.selectedState = e.target.attributes[0].value;
-      this.SELECTED_MOOD.style.background = this._getGradient(this.LEGEND[this.selectedState].code);
+      e.target.classList.add('typeselected');
+      //this.SELECTED_MOOD.style.background = this._getGradient(this.LEGEND[this.selectedState].code);
     }
   }
 
