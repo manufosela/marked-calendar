@@ -10,7 +10,39 @@ Lit-Elementy web component configurable calendar to mark moods or other configur
 ```
 <h2>Basic marked-calendar Demo</h2>
 <h3>Demo</h3>
-<marked-calendar year="2019" title="Imputacion de horas" savedata weekends options=[["#0F0","V"],["#FF0","LD"],["#F00","A"],["#00F","T"],["#F90","E"]]></marked-calendar>
+<marked-calendar 
+        year="2020"
+        title="Imputacion de horas"
+        savedata
+        weekends 
+        legend='[
+          {"code": "#0F0", "label": "V",  "title": "Vacaciones"},
+          {"code": "#FF0", "label": "LD", "title": "Libre Disposición"},
+          {"code": "#F00", "label": "A",  "title": "Ausencia"},
+          {"code": "#00F", "label": "T",  "title": "Teletrabajo"},
+          {"code": "#F90", "label": "DE", "title": "Dia de Eventos"},
+          {"code": "#F0F", "label": "AH", "title": "Autorizado por el Head"},
+          {"code": "#0FF", "label": "CD", "title": "Dia de la Capacidad"} ]'
+        holidays='[
+          {"title": "Año nuevo", "date": "1/1"},
+          {"title": "Dia de Reyes", "date": "6/1"},
+          {"title": "Jueves Santo", "date": "9/4"},
+          {"title": "Viernes Santo", "date": "10/4"},
+          {"title": "Día del trabajador", "date": "1/5"},
+          {"title": "Día de la comunidad de Madrid", "date":"2/5"}, 
+          {"title": "San Isidro", "date":"15/5"}, 
+          {"title": "Día de la Asunción de la Virgen", "date": "15/8"}, 
+          {"title": "Día de todos los santos (pasado del domingo)", "date": "2/11"},
+          {"title": "Día de la Almudena", "date":"9/11"}, 
+          {"title": "Día de la constitución", "date": "6/12"},
+          {"title": "Día de la Inmaculada Concepción", "date": "9/12"},
+          {"title": "Festivo en Kairós", "date": "24/12"},
+          {"title": "Navidad", "date": "25/12"},
+          {"title": "Festivo en Kairós", "date": "31/12"},
+          {"title": "Año Nuevo", "date": "1/1/2021"},
+          {"title": "Día de Reyes", "date": "6/1/2021"} ]'
+        >
+></marked-calendar>
 
 ```
 <!---
@@ -24,7 +56,38 @@ Lit-Elementy web component configurable calendar to mark moods or other configur
 ```
 -->
 ```html
-<marked-calendar year="2019" title="Imputacion de horas" savedata weekends options=[["#0F0","V"],["#FF0","LD"],["#F00","A"],["#00F","T"],["#F90","E"]]></marked-calendar>
+<marked-calendar
+  year="2020"
+  title="Imputacion de horas"
+  savedata
+  weekends
+  legend='[
+    {"code": "#0F0", "label": "V",  "title": "Vacaciones"},
+    {"code": "#FF0", "label": "LD", "title": "Libre Disposición"},
+    {"code": "#F00", "label": "A",  "title": "Ausencia"},
+    {"code": "#00F", "label": "T",  "title": "Teletrabajo"},
+    {"code": "#F90", "label": "DE", "title": "Dia de Eventos"},
+    {"code": "#F0F", "label": "AH", "title": "Autorizado por el Head"},
+    {"code": "#0FF", "label": "CD", "title": "Dia de la Capacidad"} ]'
+  holidays='[
+    {"title": "Año nuevo", "date": "1/1"},
+    {"title": "Dia de Reyes", "date": "6/1"},
+    {"title": "Jueves Santo", "date": "9/4"},
+    {"title": "Viernes Santo", "date": "10/4"},
+    {"title": "Día del trabajador", "date": "1/5"},
+    {"title": "Día de la comunidad de Madrid", "date":"2/5"}, 
+    {"title": "San Isidro", "date":"15/5"}, 
+    {"title": "Día de la Asunción de la Virgen", "date": "15/8"}, 
+    {"title": "Día de todos los santos (pasado del domingo)", "date": "2/11"},
+    {"title": "Día de la Almudena", "date":"9/11"}, 
+    {"title": "Día de la constitución", "date": "6/12"},
+    {"title": "Día de la Inmaculada Concepción", "date": "9/12"},
+    {"title": "Festivo en Kairós", "date": "24/12"},
+    {"title": "Navidad", "date": "25/12"},
+    {"title": "Festivo en Kairós", "date": "31/12"},
+    {"title": "Año Nuevo", "date": "1/1/2021"},
+    {"title": "Día de Reyes", "date": "6/1/2021"} ]'
+  ></marked-calendar>
 
 ```
 ## Install the Polymer-CLI
@@ -34,13 +97,13 @@ First, make sure you have the [Polymer CLI](https://www.npmjs.com/package/polyme
 ## Viewing Your Element
 
 ```
-$ polymer serve
+$ npm run start
 ```
 
 ## Running Tests
 
 ```
-$ polymer test
+$ npm run test
 ```
 
 ## Build
@@ -48,11 +111,9 @@ $ polymer test
 $ npm run build
 ```
 
-Your application is already set up to be tested via [web-component-tester](https://github.com/Polymer/web-component-tester). Run `polymer test` to run your application's test suite locally.
-
 ## Author
 
-* **Mánu Fosela** - *Javascript Composer* - [manufosela](https://github.com/manufosela)
+* **Mánu Fosela** - *Javascript Developer* - [manufosela](https://github.com/manufosela)
 
 ## License
 
