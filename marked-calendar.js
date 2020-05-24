@@ -313,6 +313,20 @@ class MarkedCalendar extends LitElement {
         { letter: 'O', name: 'Octubre' },
         { letter: 'N', name: 'Noviembre' },
         { letter: 'D', name: 'Diciembre' }
+      ],
+      en: [
+        { letter: 'J', name: 'January' },
+        { letter: 'F', name: 'February' },
+        { letter: 'M', name: 'March' },
+        { letter: 'A', name: 'April' },
+        { letter: 'M', name: 'May' },
+        { letter: 'J', name: 'June' },
+        { letter: 'J', name: 'July' },
+        { letter: 'A', name: 'August' },
+        { letter: 'S', name: 'September' },
+        { letter: 'O', name: 'October' },
+        { letter: 'N', name: 'November' },
+        { letter: 'D', name: 'December' }
       ]
     };
     this.DAYOFWEEK_LETTER = {
@@ -324,6 +338,15 @@ class MarkedCalendar extends LitElement {
         { letter: 'V', name: 'Viernes' },
         { letter: 'S', name: 'Sábado' },
         { letter: 'D', name: 'Domingo' }
+      ],
+      en: [
+        { letter: 'M', name: 'Monday' },
+        { letter: 'T', name: 'Tuesday' },
+        { letter: 'W', name: 'Wednesday' },
+        { letter: 'T', name: 'Thursday' },
+        { letter: 'F', name: 'Friday' },
+        { letter: 'S', name: 'Saturday' },
+        { letter: 'S', name: 'Sunday' }
       ]
     };
     this.selectedState = null;
@@ -593,7 +616,7 @@ class MarkedCalendar extends LitElement {
     for (let i = 0; i < 7; i++) {
       let weekDayContainer = document.createElement('span');
       weekDayContainer.className = 'dayofweek';
-      weekDayContainer.textContent = this.DAYOFWEEK_LETTER.sp[i].letter;
+      weekDayContainer.textContent = this.DAYOFWEEK_LETTER[this.lang][i].letter;
       this.MAIN_CONTAINER.appendChild(weekDayContainer);
     }
   }
@@ -765,7 +788,6 @@ class MarkedCalendar extends LitElement {
       }
       this.selectedState = e.target.attributes[0].value;
       e.target.classList.add('typeselected');
-      //this.SELECTED_MOOD.style.background = this._getGradient(this.LEGEND[this.selectedState].code);
     }
   }
 
