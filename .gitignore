@@ -1,4 +1,7 @@
 /node_modules/
 *.polymer
 /build/
+/dist/
+/storybook-static/
 .vscode
+.storybook
