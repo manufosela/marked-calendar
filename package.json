@@ -1,14 +1,14 @@
 {
   "name": "marked-calendar",
   "description": "Lit-Element webcomponent marked-calendar",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "main": "marked-calendar.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/user/marked-calendar"
   },
   "author": "user",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "keywords": [
     "webcomponent",
     "lit-element"
