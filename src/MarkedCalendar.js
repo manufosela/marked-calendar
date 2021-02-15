@@ -458,7 +458,7 @@ export class MarkedCalendar extends LitElement {
     let DoW = new Date(`${this.year}/${Number(month) + 1}/${Number(day) + 1}`).getDay();
     if (DoW === 0 || DoW === 6) {
       dayContainer.style.background = '#CCC';
-      dayContainer.style.cursor = 'not-allowed';
+      dayContainer.style.cursor = (this.saveData) ? 'not-allowed' : 'help';
       noWeekend = false;
     }
     return [dayContainer, noWeekend];
@@ -472,7 +472,7 @@ export class MarkedCalendar extends LitElement {
     this.arrHolidays.forEach(dayHoliday => {
       if (dayHoliday.date === d + '/' + m) {
         dayContainer.style.background = '#999';
-        dayContainer.style.cursor = 'not-allowed';
+        dayContainer.style.cursor = (this.saveData) ? 'not-allowed' : 'help';
         dayContainer.title = dayHoliday.title;
         noHolidays = false;
       }

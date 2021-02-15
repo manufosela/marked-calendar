@@ -93,7 +93,7 @@ export const markedCalendarStyles = css`
   #daysHeader,
   #tableContainer {
     display: flex;
-    justify-content: center;
+    justify-content: top;
     margin-bottom: 0.25rem;
   }
 
@@ -113,10 +113,15 @@ export const markedCalendarStyles = css`
     font-weight: bold;
   }
 
+  .monthHeader {
+    padding:0;
+  }
+
   .monthContainer {
     display: flex;
     flex-direction: column;
     align-items: stretch;
+    height: var(--cellSize);    
   }
   .monthContainer:hover {
     cursor: pointer;
