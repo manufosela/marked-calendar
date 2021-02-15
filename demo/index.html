@@ -4,7 +4,7 @@
     <title>marked-calendar demo</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
-    <script type="module" src="../marked-calendar.js"></script>
+    <script type="module" src="../index.js"></script>
     <style>
       .blocks {
         display:flex;
@@ -53,37 +53,35 @@
       <marked-calendar 
         id="calendario-demo"
         name="Imputacion de horas"
+        easter-week
         weekends
         change-view
         lang="en"
-        view='month'
-        legend='[
-          {"code": "#0F0", "label": "V",  "title": "Vacaciones"},
-          {"code": "#FF0", "label": "LD", "title": "Libre Disposición"},
-          {"code": "#F00", "label": "A",  "title": "Ausencia"},
-          {"code": "#00F", "label": "T",  "title": "Teletrabajo"},
-          {"code": "#F90", "label": "DE", "title": "Dia de Eventos"},
-          {"code": "#F0F", "label": "AH", "title": "Autorizado por el Head"},
-          {"code": "#0FF", "label": "CD", "title": "Dia de la Capacidad"} ]'
-        holidays='[
-          {"title": "Año nuevo", "date": "1/1"},
-          {"title": "Dia de Reyes", "date": "6/1"},
-          {"title": "Jueves Santo", "date": "9/4"},
-          {"title": "Viernes Santo", "date": "10/4"},
-          {"title": "Día del trabajador", "date": "1/5"},
-          {"title": "Día de la comunidad de Madrid", "date":"2/5"}, 
-          {"title": "San Isidro", "date":"15/5"}, 
-          {"title": "Día de la Asunción de la Virgen", "date": "15/8"}, 
-          {"title": "Día de todos los santos (pasado del domingo)", "date": "2/11"},
-          {"title": "Día de la Almudena", "date":"9/11"}, 
-          {"title": "Día de la constitución", "date": "6/12"},
-          {"title": "Día de la Inmaculada Concepción", "date": "9/12"},
-          {"title": "Festivo en Kairós", "date": "24/12"},
-          {"title": "Navidad", "date": "25/12"},
-          {"title": "Festivo en Kairós", "date": "31/12"},
-          {"title": "Año Nuevo", "date": "1/1/2021"},
-          {"title": "Día de Reyes", "date": "6/1/2021"} ]'
-        >
+        view='month'>
+          <ul id="legend">
+            <li code="#0F0" label="V">Vacaciones</li>
+            <li code="#FF0" label="LD">Libre Disposición</li>
+            <li code="#F00" label="A">Ausencia</li>
+            <li code="#00F" label="T">Teletrabajo</li>
+            <li code="#F90" label="DE">Día de Eventos</li>
+            <li code="#F0F" label="AH">Autorizado por el Head</li>
+            <li code="#0FF" label="CD">Día de la Capacidad</li>
+          </ul>
+          <ul id="holidays">
+            <li title="Año nuevo">1/1</li>
+            <li title="Dia de Reyes">6/1</li>
+            <li title="Día del trabajador">1/5</li>
+            <li title="Día de la comunidad de Madrid">2/5</li>
+            <li title="San Isidro">15/5</li>
+            <li title="Día de la Asunción de la Virgen">15/8"</li>
+            <li title="Día de todos los santos">2/11</li>
+            <li title="Día de la Almudena">9/11</li>
+            <li title="Día de la constitución">6/12</li>
+            <li title="Día de la Inmaculada Concepción">9/12</li>
+            <li title="Festivo en Kairós">24/12</li>
+            <li title="Navidad">25/12</li>
+            <li title="Festivo en Kairós">31/12</li>
+          </ul>
       </marked-calendar>
     </div>
   </body>

@@ -1,5 +1,6 @@
 /* eslint-disable no-bitwise */
-import { LitElement, html, css } from 'lit-element';
+import { LitElement, html } from 'lit-element';
+import { markedCalendarStyles } from './marked-calendar-styles';
 
 /**
  * `marked-calendar`
@@ -11,7 +12,7 @@ import { LitElement, html, css } from 'lit-element';
  * @demo demo/index.html
  */
 
-class MarkedCalendar extends LitElement {
+export class MarkedCalendar extends LitElement {
   static get is() {
     return 'marked-calendar';
   }
@@ -24,256 +25,13 @@ class MarkedCalendar extends LitElement {
       name: { type: String },
       saveData: { type: Boolean, attribute: 'save-data' },
       weekends: { type: Boolean },
-      changeView: { type: Boolean, attribute: 'change-view' },
-      legend: { type: String }, // stringify of an array
-      holidays: { type: String } // stringify of an array
+      easterWeek: { type: Boolean, attribute: 'easter-week' },
+      changeView: { type: Boolean, attribute: 'change-view' }
     };
   }
 
   static get styles() {
-    return css`
-      :host {
-        display:flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background: #f8f7f2;
-        font-family: "Amatic SC", cursive;
-        font-size: 100%;
-        -webkit-user-select: none;
-          -moz-user-select: none;
-            -ms-user-select: none;
-                user-select: none;
-
-        --cellSize: 1.25em;
-      }
-
-      .title {
-        text-align: center;
-        font-family: "Pacifico", cursive;
-        margin: 0;
-        color: #564d65;
-        text-shadow: 1px 3px 1px #dfe8ea;
-      }
-
-      .social {
-        position: absolute;
-        left: 10px;
-        top: 10px;
-      }
-      .social a img {
-        display: inline-block;
-        height: 1.5em;
-      }
-
-      #guide {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        margin: 1em 0;
-      }
-      #guide:hover {
-        cursor: pointer;
-      }
-      #selectedState {
-        color: #F30;
-        font-weight: bold;
-        font-size: 1.1rem;
-        letter-spacing: 3px;
-      }
-      #selectedState span {
-        width: 1em;
-        height: 1em;
-        display: inline-block;
-        vertical-align: middle;
-      }
-
-      #states {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        max-width:22rem;
-      }
-      #states div {
-        position: relative;
-        margin: 5px 1em;
-        padding-left: var(--cellSize);
-        width: 2em;
-      }
-      #states div span {
-        position: absolute;
-        left: 0;
-        top: 0.25em;
-        width: 1em;
-        height: 1em;
-      }
-      .typeselected {
-        border:3px inset !important;
-      }
-
-      /* Vista AÑO */
-      .content {
-        display: inline-flex;
-        flex-direction: column;
-      }
-
-      .yearMainContainer,
-      #monthHeader,
-      #daysHeader,
-      #tableContainer {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 0.25em;
-      }
-
-      #daysHeader {
-        margin-left: var(--cellSize);
-        margin-bottom: 0;
-        margin-top: 1em;
-      }
-
-      .monthHeader,
-      .dayHeader {
-        width: var(--cellSize);
-        height: var(--cellSize);
-        font-size: 1rem;
-        padding: 1px 0 0 1px;
-        text-align: center;
-        font-weight: bold;
-      }
-
-      .monthContainer {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .monthContainer:hover {
-        cursor: pointer;
-      }
-      .monthLetterBtn {
-        width:var(--cellSize);
-        padding:0;
-      }
-
-      .dayContainer {
-        width: var(--cellSize);
-        height: var(--cellSize);
-        border: 1px solid #dfe8ea;
-        margin-right: -1px;
-        margin-bottom: -1px;
-      }
-
-      /* VISTA MES */
-      .monthMainContainer {
-        width:21rem;
-        display:grid;
-        grid-template-columns: repeat(7, 1fr);
-      }
-
-      .monthMainContainer span.dayofweek {
-        text-align: center;
-        font-weight:bold;
-        font-size:1.2rem;
-      }
-
-      .monthMainContainer span.dayofmonth { 
-        border:1px solid #CCC; 
-        height: 3rem;
-        width: 3rem; 
-      }
-
-      .monthMainContainer span div {
-        font-size: 2rem;
-        text-align:center;
-        height:65%;
-        width:100%;
-      }
-
-      .calendarNavigation { 
-        text-align: center;
-        color:red;
-        
-        height: 2rem;
-      }
-      .calendarNavigation .navBar {
-        display:flex;
-        width:80%;
-        margin-left:10%;
-      }
-      .calendarNavigation .navBar button {
-        margin:0 1rem;
-      }
-      .calendarNavigation .navBar .navTitle {
-        width:200px;
-      }
-      #changeViewBtn { width:7rem; }
-      .notice { width:150px; height:50px; padding:5px; position:absolute; display:none; border:2px solid #000; border-radius:10px; background:#F90; }
-
-      @media (min-width: 769px) {
-        .content {
-          display: flex;
-          justify-content: center;
-          --cellSize: 1em;
-        }
-
-        .yearMainContainer {
-          flex-direction: column;
-        }
-
-        #monthHeader {
-          flex-direction: column;
-        }
-
-        .dayHeader,
-        #daysHeader,
-        .monthContainer {
-          flex-direction: row;
-        }
-      }
-      @media (max-width: 768px) {
-        .content {
-          display: inline-flex;
-          flex-direction: row;
-          justify-content: center;
-          width: 90%;
-        }
-
-        .yearMainContainer,
-        #monthHeader {
-          flex-direction: row;
-        }
-
-        .dayHeader,
-        #daysHeader,
-        #tableContainer {
-          flex-direction: column;
-        }
-
-        .monthMainContainer {
-          width:15rem;
-          margin:0;
-        }
-
-        .monthMainContainer span.dayofweek {
-          font-size:0.8rem;
-        }
-        .monthMainContainer span.dayofmonth { 
-          border:1px solid #CCC; 
-          height: 3rem;
-          width: 2.1rem; 
-          font-size:0.8rem;
-        }
-
-        #guide {
-          font-size:1rem;
-        }
-        #states {
-          width: 100%;
-        }
-      }
-    `;
+    return [markedCalendarStyles];
   }
 
   constructor() {
@@ -404,14 +162,14 @@ class MarkedCalendar extends LitElement {
   }
 
   setMarkedDays(markedDays) {
+    const structure = this._getCurrentLSStructure();
+    const year = structure[this.year];
     markedDays = (typeof markedDays === 'string') ? JSON.parse(markedDays) : markedDays;
     markedDays.forEach(el => {
       let dayVal = el.day.split('/');
       let day = dayVal[0] - 1;
       let month = dayVal[1] - 1;
       let val = el.value;
-      const structure = this._getCurrentLSStructure();
-      const year = structure[this.year];
       year[month][day] = val;
       this._setCurrentLSStructure(year);
       this.generateVisualStructure();
@@ -500,6 +258,7 @@ class MarkedCalendar extends LitElement {
     if (this.month === 0) {
       this.month = 11;
       this.year--;
+      this._calcEasterWeek();
     }
     this.createWeeks(this.month);
     this.shadowRoot.querySelector('#navTitle').textContent = `${this.MONTH_LETTERS.sp[this.month].name} ${this.year}`;
@@ -510,6 +269,7 @@ class MarkedCalendar extends LitElement {
     if (this.month === 12) {
       this.month = 0;
       this.year++;
+      this._calcEasterWeek();
     }
     this.createWeeks(this.month);
     this.shadowRoot.querySelector('#navTitle').textContent = `${this.MONTH_LETTERS.sp[this.month].name} ${this.year}`;
@@ -529,14 +289,11 @@ class MarkedCalendar extends LitElement {
   _decrementYear(e) {
     this.year--;
     if (typeof window.localStorage[this.structureName] === 'undefined') {
-      if (this.saveData) {
-        let structure = this.generateDataStructure();
-        localStorage.setItem(this.structureName, JSON.stringify(structure));
-      } else {
-        this.year++;
-        return;
-      }
+      let structure = this.generateDataStructure();
+      localStorage.setItem(this.structureName, JSON.stringify(structure));
+      this.year++;
     }
+    this._calcEasterWeek();
     this.createDayCells(this.DAYHEADERLENGTH);
     this.createMonths();
     this.shadowRoot.querySelector('#navTitle').textContent = `${this.year}`;
@@ -553,6 +310,7 @@ class MarkedCalendar extends LitElement {
         return;
       }
     }
+    this._calcEasterWeek();
     this.createDayCells(this.DAYHEADERLENGTH);
     this.createMonths();
     this.shadowRoot.querySelector('#navTitle').textContent = `${this.year}`;
@@ -712,8 +470,7 @@ class MarkedCalendar extends LitElement {
     let m = String(Number(month) + 1);
     let y = this.year;
     this.arrHolidays.forEach(dayHoliday => {
-      if (dayHoliday.date === d + '/' + m  && this.year === this.YEAR ||
-          dayHoliday.date === d + '/' + m + '/' + this.year) {
+      if (dayHoliday.date === d + '/' + m) {
         dayContainer.style.background = '#999';
         dayContainer.style.cursor = 'not-allowed';
         dayContainer.title = dayHoliday.title;
@@ -797,9 +554,60 @@ class MarkedCalendar extends LitElement {
     }
   }
 
+  _calcEasterWeek() {
+    let M;
+    let N;
+    let dia;
+    let mes;
+    if      (this.year > 1583 && this.year < 1699) { M=22; N=2; } 
+    else if (this.year > 1700 && this.year < 1799) { M=23; N=3; } 
+    else if (this.year > 1800 && this.year < 1899) { M=23; N=4; } 
+    else if (this.year > 1900 && this.year < 2099) { M=24; N=5; } 
+    else if (this.year > 2100 && this.year < 2199) { M=24; N=6; } 
+    else if (this.year > 2200 && this.year < 2299) { M=25; N=0; } 
+
+    const a = this.year % 19;
+    const b = this.year % 4;
+    const c = this.year % 7;
+    const d = ((19*a) + M) % 30;
+    const e = ((2*b) + (4*c) + (6*d) + N) % 7;
+    const f = d + e;
+
+    if (f < 10) { 
+     dia = f + 22;
+     mes = 3;
+    } else  {
+     dia = f - 9;
+     mes = 4;
+    };
+
+    if (dia == 26 && mes == 4){ 
+     dia = 19;
+    };
+
+    if (dia == 25 && mes == 4 && d == 28 && e == 6 && a > 10){
+     dia = 18;
+    };
+
+    const easterWeek = new Date(this.year, mes - 1, dia);
+    const jS = new Date(this.year, mes - 1, dia);
+    const vS = new Date(this.year, mes - 1, dia);
+    const juevesSanto = new Date(jS.setDate(easterWeek.getDate() - 3));
+    const viernesSanto = new Date(vS.setDate(easterWeek.getDate() - 2));
+    this.arrHolidays = this.arrHolidays.filter((obj) => {
+      return (obj.title !== 'Jueves Santo' && obj.title !== 'Viernes Santo');
+    });
+    this.arrHolidays.push({title:'Jueves Santo', date:`${juevesSanto.getDate()}/${juevesSanto.getMonth() + 1}` });
+    this.arrHolidays.push({title:'Viernes Santo', date:`${viernesSanto.getDate()}/${viernesSanto.getMonth() + 1}` });
+    // console.log(juevesSanto, viernesSanto);
+  }; 
+
   _defineLEGEND() {
-    if (this.legend !== '') {
-      this.LEGEND = JSON.parse(this.legend);
+    const legendDOM = [...this.querySelectorAll('#legend li')];
+    if (legendDOM) {
+      this.LEGEND = legendDOM.map((legendItem) => {
+        return { code: legendItem.getAttribute('code'), label: legendItem.getAttribute('label'), title: legendItem.textContent };
+      });
       if (this.saveData) {
         this.LEGEND.unshift({code: '#FFFFFF', label: 'X', title: 'borrar'});
       } else {
@@ -809,8 +617,12 @@ class MarkedCalendar extends LitElement {
   }
 
   _setArrHolidays() {
-    if (this.holidays !== '') {
-      this.arrHolidays = JSON.parse(this.holidays);
+    const holidaysDOM = [...this.querySelectorAll('#holidays li')];
+    if (holidaysDOM) {
+      this.arrHolidays = holidaysDOM.map((holidayItem) => {
+        return { title: holidayItem.getAttribute('title'), date: holidayItem.textContent };
+      });
+      this._calcEasterWeek();
     }
   }
 
@@ -844,9 +656,10 @@ class MarkedCalendar extends LitElement {
   }
 
   render() {
+    const select = (this.saveData) ? 'cursor_pointer' : 'cursor_normal';
     return html`
       <h1 class="title">${this.name}</h1>
-      <div id="guide">
+      <div id="guide" class="${select}">
         <div id="selectedState">${(this.saveData) ? html`Select an option:` : html`Legend`}<span></span></div>
         <div id="states"></div>
       </div>
@@ -862,5 +675,3 @@ class MarkedCalendar extends LitElement {
     `;
   }
 }
-
-window.customElements.define(MarkedCalendar.is, MarkedCalendar);
