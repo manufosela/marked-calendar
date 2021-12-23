@@ -1,88 +1,29 @@
 <!doctype html>
-<html>
-  <head>
-    <title>marked-calendar demo</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
-    <script type="module" src="../index.js"></script>
-    <style>
-      .blocks {
-        display:flex;
-        flex-direction:row;
-        flex-wrap: wrap;
-      }
-      .block {
-        display:flex;
-        flex-direction:column;
-        flex-wrap: wrap;
-        white-space: normal;
-      }
-      .code {
-        padding: 20px;
-        color:#FFF; 
-        background: #000;
-      }
-      .attributes {
-        padding-left: 20px;
-      }
-    </style>
-  </head>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      background: #fafafa;
+    }
+  </style>
+</head>
+<body>
+  <div id="demo"></div>
 
-  <body>
-    <div class="vertical-section-container centered">
-      <h3>Basic marked-calendar Demo</h3>
-      <div class="blocks">
-        <pre class="block code">
-          <code>
-            &lt;marked-calendar year="2019" title="Imputacion de horas" weekends&gt;&lt;/marked-calendar&gt;
-          </code>
-        </pre>
-        <pre class="block attributes">
-          <h3>Attributes</h3>
-          <ul>
-            <li>year (Number)</li>
-            <li>name (String)</li>
-            <li>save-data (Boolean)</li>
-            <li>weekends (Boolean)</li>
-            <li>change-view (Boolean)</li>
-            <li>legend (Array Stringify)</li>
-          </ul>
-        </pre>
-      </div>
+  <script type="module">
+    import { html, render } from 'lit';
+    import '../marked-calendar.js';
 
-      <marked-calendar 
-        id="calendario-demo"
-        name="Imputacion de horas"
-        easter-week
-        weekends
-        change-view
-        lang="en"
-        view='month'>
-          <ul id="legend">
-            <li code="#0F0" label="V">Vacaciones</li>
-            <li code="#FF0" label="LD">Libre Disposición</li>
-            <li code="#F00" label="A">Ausencia</li>
-            <li code="#00F" label="T">Teletrabajo</li>
-            <li code="#F90" label="DE">Día de Eventos</li>
-            <li code="#F0F" label="AH">Autorizado por el Head</li>
-            <li code="#0FF" label="CD">Día de la Capacidad</li>
-          </ul>
-          <ul id="holidays">
-            <li title="Año nuevo">1/1</li>
-            <li title="Dia de Reyes">6/1</li>
-            <li title="Día del trabajador">1/5</li>
-            <li title="Día de la comunidad de Madrid">2/5</li>
-            <li title="San Isidro">15/5</li>
-            <li title="Día de la Asunción de la Virgen">15/8"</li>
-            <li title="Día de todos los santos">2/11</li>
-            <li title="Día de la Almudena">9/11</li>
-            <li title="Día de la constitución">6/12</li>
-            <li title="Día de la Inmaculada Concepción">9/12</li>
-            <li title="Festivo en Kairós">24/12</li>
-            <li title="Navidad">25/12</li>
-            <li title="Festivo en Kairós">31/12</li>
-          </ul>
-      </marked-calendar>
-    </div>
-  </body>
+    const title = 'Hello owc World!';
+    render(
+      html`
+        <marked-calendar .title=${title}>
+          some light-dom
+        </marked-calendar>
+      `,
+      document.querySelector('#demo')
+    );
+  </script>
+</body>
 </html>

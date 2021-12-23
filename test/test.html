@@ -1,0 +1,393 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      display:flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: #f8f7f2;
+      font-family: "Amatic SC", cursive;
+      font-size: 100%;
+      -webkit-user-select: none;
+        -moz-user-select: none;
+          -ms-user-select: none;
+              user-select: none;
+
+      --cellSize: 1.25rem;
+    }
+    
+    /* Vista AÑO */
+    .content {
+      display: inline-flex;
+      flex-direction: column;
+    }
+
+    .yearMainContainer,
+    #daysHeader,
+    #tableContainer {
+      display: flex;
+      flex-direction: column;
+      justify-content: top;
+    }
+    .yearMainContainer {
+      flex-direction: row;
+    }
+    #tableContainer {
+      width: 80%;
+      margin: 1rem;
+      overflow-x: scroll;
+      overflow-y: hidden;      
+    }
+
+    #daysHeader {
+      margin-bottom: 0;
+    }
+
+    .dayHeader {
+      width: var(--cellSize);
+      height: var(--cellSize);
+      font-size: 1rem;
+      text-align: center;
+      font-weight: bold;
+      border: 1px solid transparent;
+    }
+
+    .monthDays {
+      display: flex;
+      flex-direction: row;
+      border-right: 0.5rem solid red;
+    }
+
+    #monthHeader {
+      display: flex;
+      flex-direction: row;
+    }
+    .monthHeader {
+      font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    }
+
+    .monthContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      height: var(--cellSize);
+      border-right: 0.5rem solid red;
+    }
+    .monthContainer:hover {
+      cursor: pointer;
+    }
+    .monthLetterBtn {
+      width:var(--cellSize);
+      padding:0;
+    }
+
+    .dayContainer {
+      width: var(--cellSize);
+      height: var(--cellSize);
+      border: 1px solid #dfe8ea;
+    }
+
+    @media (min-width: 769px) {
+      .content {
+        display: flex;
+        justify-content: center;
+        --cellSize: 1rem;
+      }
+
+      .yearMainContainer {
+        flex-direction: row;
+      }
+
+      #daysHeader,
+      .monthContainer {
+        flex-direction: row;
+      }
+    }
+    @media (max-width: 768px) {
+      .content {
+        display: inline-flex;
+        flex-direction: row;
+        justify-content: center;
+        width: 90%;
+      }
+
+      .yearMainContainer,
+      #daysHeader,
+      #monthHeader {
+        flex-direction: row;
+      }
+
+      .dayHeader,
+      #tableContainer {
+        flex-direction: column;
+      }
+
+      .monthMainContainer {
+        width:15rem;
+        margin:0;
+      }
+
+      .monthMainContainer span.dayofweek {
+        font-size:0.8rem;
+      }
+      .monthMainContainer span.dayofmonth { 
+        border:1px solid #CCC; 
+        height: 3rem;
+        width: 2.1rem; 
+        font-size:0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="tableContainer">
+    <div id="monthHeader"></div>
+    <div id="daysHeader"></div>
+    <div id="mainContainer"></div>
+  </div>
+  <script>
+    const today = new Date();
+    const DAYHEADERLENGTH = 31;
+    let arrHolidays = [];
+    const YEARNOW = new Date().getFullYear();
+    let year = YEARNOW;
+    let YEAR = year;
+    let structureName;
+    let MAIN_CONTAINER;
+    let DAYS_HEADER;
+    let MONTH_HEADER;
+    const lang = 'sp';
+    const MONTH_LETTERS = {
+      sp: [
+        { letter: 'E', name: 'Enero' },
+        { letter: 'F', name: 'Febrero' },
+        { letter: 'M', name: 'Marzo' },
+        { letter: 'A', name: 'Abril' },
+        { letter: 'M', name: 'Mayo' },
+        { letter: 'J', name: 'Junio' },
+        { letter: 'J', name: 'Julio' },
+        { letter: 'A', name: 'Agosto' },
+        { letter: 'S', name: 'Septiembre' },
+        { letter: 'O', name: 'Octubre' },
+        { letter: 'N', name: 'Noviembre' },
+        { letter: 'D', name: 'Diciembre' }
+      ],
+      en: [
+        { letter: 'J', name: 'January' },
+        { letter: 'F', name: 'February' },
+        { letter: 'M', name: 'March' },
+        { letter: 'A', name: 'April' },
+        { letter: 'M', name: 'May' },
+        { letter: 'J', name: 'June' },
+        { letter: 'J', name: 'July' },
+        { letter: 'A', name: 'August' },
+        { letter: 'S', name: 'September' },
+        { letter: 'O', name: 'October' },
+        { letter: 'N', name: 'November' },
+        { letter: 'D', name: 'December' }
+      ]
+    };
+    const arrDaysByMonth = getArrDaysByMonth();
+
+    function getArrDaysByMonth() {
+      const febDays = ((this.year % 4 === 0 && this.year % 100 !== 0) || this.year % 400 === 0) ? 29 : 28;
+      return [31, febDays, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    }
+
+    function checkLocalStorage() {
+      if (window.localStorage[this.structureName] === undefined) {
+        let structure = generateDataStructure();
+        localStorage.setItem(structureName, JSON.stringify(structure));
+      }
+    }
+
+    function generateDataStructure() {
+      let data = {};
+      data[year] = {};
+      for (let i = 0; i < 12; i++) {
+        data[year][i] = {}; //Array.from({ length: this._getDaysFromMonth(i + 1) }, () => null);
+      }
+      return data;
+    }
+
+    function calcEasterWeek() {
+      let M;
+      let N;
+      let dia;
+      let mes;
+      if      (year > 1583 && year < 1699) { M=22; N=2; } 
+      else if (year > 1700 && year < 1799) { M=23; N=3; } 
+      else if (year > 1800 && year < 1899) { M=23; N=4; } 
+      else if (year > 1900 && year < 2099) { M=24; N=5; } 
+      else if (year > 2100 && year < 2199) { M=24; N=6; } 
+      else if (year > 2200 && year < 2299) { M=25; N=0; } 
+
+      const a = year % 19;
+      const b = year % 4;
+      const c = year % 7;
+      const d = ((19*a) + M) % 30;
+      const e = ((2*b) + (4*c) + (6*d) + N) % 7;
+      const f = d + e;
+
+      if (f < 10) { 
+      dia = f + 22;
+      mes = 3;
+      } else  {
+      dia = f - 9;
+      mes = 4;
+      };
+
+      if (dia == 26 && mes == 4){ 
+      dia = 19;
+      };
+
+      if (dia == 25 && mes == 4 && d == 28 && e == 6 && a > 10){
+      dia = 18;
+      };
+
+      const easterWeek = new Date(year, mes - 1, dia);
+      const jS = new Date(year, mes - 1, dia);
+      const vS = new Date(year, mes - 1, dia);
+      const juevesSanto = new Date(jS.setDate(easterWeek.getDate() - 3));
+      const viernesSanto = new Date(vS.setDate(easterWeek.getDate() - 2));
+      arrHolidays = arrHolidays.filter((obj) => {
+        return (obj.title !== 'Jueves Santo' && obj.title !== 'Viernes Santo');
+      });
+      arrHolidays.push({title:'Jueves Santo', date:`${juevesSanto.getDate()}/${juevesSanto.getMonth() + 1}` });
+      arrHolidays.push({title:'Viernes Santo', date:`${viernesSanto.getDate()}/${viernesSanto.getMonth() + 1}` });
+      // console.log(juevesSanto, viernesSanto);
+    }
+
+    function drawIsWeekend(dayContainer, month, day) {
+      let noWeekend = true;
+      let DoW = new Date(`${year}/${Number(month) + 1}/${Number(day) + 1}`).getDay();
+      if (DoW === 0 || DoW === 6) {
+        dayContainer.style.background = '#CCC';
+        // dayContainer.style.cursor = (saveData) ? 'not-allowed' : 'help';
+        noWeekend = false;
+      }
+      return [dayContainer, noWeekend];
+    }
+
+    function drawIsHoliday(dayContainer, month, day) {
+      let noHolidays = true;
+      let d = String(Number(day) + 1);
+      let m = String(Number(month) + 1);
+      let y = year;
+      arrHolidays.forEach(dayHoliday => {
+        if (dayHoliday.date === d + '/' + m) {
+          dayContainer.style.background = '#999';
+          // dayContainer.style.cursor = (this.saveData) ? 'not-allowed' : 'help';
+          dayContainer.title = dayHoliday.title;
+          noHolidays = false;
+        }
+      });
+      return [dayContainer, noHolidays];
+    }
+
+    function setDayContent(dataMonthDay, month, day) {
+      let dayContainer = document.createElement('div');
+      let noHolidays = true;
+      let noWeekend = true;
+      let holidays = (arrHolidays.length > 0);
+      dayContainer.className = 'dayContainer';
+      if (dataMonthDay) {
+        dayContainer.style.background = _getGradient(LEGEND[dataMonthDay].code);
+        dayContainer.title = `${LEGEND[dataMonthDay].label} - ${parseInt(day) + 1}/${MONTH_LETTERS[lang][month].name}/${year}`
+      } else {
+        dayContainer.title = `${parseInt(day) + 1}/${MONTH_LETTERS[lang][month].name}/${year}`;
+      }
+      [dayContainer, noWeekend] = drawIsWeekend(dayContainer, month, day);
+      [dayContainer, noHolidays] = drawIsHoliday(dayContainer, month, day);
+      dayContainer.dataset.noweekend = noWeekend;
+      dayContainer.dataset.noholidays = noHolidays;
+      dayContainer.dataset.month = month;
+      dayContainer.dataset.day = day;
+
+      return dayContainer;
+    }
+
+    function createDayCells(dayHeaderLength, month) {
+      const monthDays = document.createElement('div');
+      monthDays.classList.add('monthDays');
+      monthDays.dataset.month = MONTH_LETTERS[lang][month].name;
+      for (let day = 1; day <= dayHeaderLength; day++) {
+        let dayHeader = document.createElement('div');
+        dayHeader.className = 'dayHeader';
+        dayHeader.textContent = day;
+        monthDays.appendChild(dayHeader);
+      }
+      DAYS_HEADER.appendChild(monthDays);
+    }
+    
+    function getCurrentLSStructure() {
+      const structure = JSON.parse(window.localStorage[structureName]);
+      if (structure[year] === undefined) {
+        structure[year] = generateDataStructure()[year];
+      }
+      return structure;
+    }
+
+    function setDayStyle(month, monthContainer) {
+      let structure = getCurrentLSStructure();
+      const data = structure[year];
+      const days = arrDaysByMonth[month];
+      for (let day = 0; day < days; day++) {
+        const content = (data[month][day]) ? data[month][day] : '';
+        const dayContainer = setDayContent(content, month, day);
+        monthContainer.appendChild(dayContainer);
+      }
+    }
+
+    function createMonths() {
+      const structure = getCurrentLSStructure();
+      const data = structure[year];
+      const months = Object.keys(getArrDaysByMonth());
+      MAIN_CONTAINER.textContent = '';
+      MAIN_CONTAINER.className = 'yearMainContainer';
+      let monthHeaderSumWidth = 0;
+      months.forEach(month => {
+        createDayCells(arrDaysByMonth[month], month);
+        let monthContainer = document.createElement('div');
+        monthContainer.className = 'monthContainer';
+        let monthHeader = document.createElement('div');
+        monthHeader.className = 'monthHeader';
+        let letter = MONTH_LETTERS[lang][month].letter;
+        let name = MONTH_LETTERS[lang][month].name;
+        monthHeader.innerHTML = name;
+        const monthHeaderWith = parseInt(document.querySelector(`[data-month="${name}"]`).clientWidth) + 10;
+        console.log(monthHeaderWith);
+        monthHeader.style.width = monthHeaderWith;
+        monthHeaderSumWidth += monthHeaderWith
+        MONTH_HEADER.appendChild(monthHeader);
+        setDayStyle(month, monthContainer);
+        MAIN_CONTAINER.appendChild(monthContainer);
+      });
+      MONTH_HEADER.style.width = monthHeaderSumWidth;
+    }
+
+    function gotoMonth() {
+      const currentMonth = today.getMonth();
+      const currentMonthName = MONTH_LETTERS[lang][currentMonth].name;
+      const monthLayer = document.querySelector(`[data-month=${currentMonthName}`);
+      console.log(monthLayer);
+      document.getElementById('tableContainer').scrollTo(monthLayer.offsetLeft - 200, 0);
+    }
+
+    window.onload = function() {
+      MAIN_CONTAINER = document.querySelector('#mainContainer');
+      DAYS_HEADER = document.querySelector('#daysHeader');
+      MONTH_HEADER = document.querySelector('#monthHeader');
+      checkLocalStorage();
+      calcEasterWeek();
+      createMonths();
+      gotoMonth();
+    }
+  </script>
+</body>
+</html>

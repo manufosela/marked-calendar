@@ -1,3 +1,1 @@
-import { MarkedCalendar } from './src/MarkedCalendar';
-
-window.customElements.define(MarkedCalendar.is, MarkedCalendar);
+export { MarkedCalendar } from './src/MarkedCalendar.js';
