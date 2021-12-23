@@ -1,4 +1,3 @@
-/* eslint-disable no-bitwise */
 import { LitElement, html } from 'lit-element';
 import { markedCalendarStyles } from './marked-calendar-styles';
 
@@ -132,6 +131,7 @@ export class MarkedCalendar extends LitElement {
   }
 
   _createUUID() {
+    this._null = null;
     let dt = new Date().getTime();
     const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
       const r = (dt + Math.random() * 16) % 16 | 0;
@@ -161,10 +161,10 @@ export class MarkedCalendar extends LitElement {
     });
   }
 
-  setMarkedDays(markedDays) {
+  setMarkedDays(mkedDays) {
     const structure = this._getCurrentLSStructure();
     const year = structure[this.year];
-    markedDays = (typeof markedDays === 'string') ? JSON.parse(markedDays) : markedDays;
+    const markedDays = (typeof mkedDays === 'string') ? JSON.parse(mkedDays) : mkedDays;
     markedDays.forEach(el => {
       const dayVal = el.day.split('/');
       const day = dayVal[0] - 1;
@@ -180,15 +180,13 @@ export class MarkedCalendar extends LitElement {
     const markedDays = [];
     const structure = this._getCurrentLSStructure();
     const year = structure[this.year];
-    for (const month in year) {
-      if (Object.prototype.hasOwnProperty.call(year, month)) {
-        for (const day in year[month]) {
-          if (Object.prototype.hasOwnProperty.call(year[month], month) && year[month][day]) {
-            markedDays.push({day: `${Number(day) + 1  }/${  Number(month) + 1}`, value: year[month][day]});
-          }
-        }
-      }
-    }
+    const months = Object.keys(year);
+    months.forEach(month => {
+      const days = Object.keys(year[month]);
+      days.forEach(day => {
+        markedDays.push({day: `${Number(day) + 1  }/${  Number(month) + 1}`, value: year[month][day]});
+      });
+    });
     return markedDays;
   }
 
@@ -202,7 +200,7 @@ export class MarkedCalendar extends LitElement {
   generateDataStructure() {
     const data = {};
     data[this.year] = {};
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 12; i+=1) {
       data[this.year][i] = {}; // Array.from({ length: this._getDaysFromMonth(i + 1) }, () => null);
     }
     return data;
@@ -210,7 +208,7 @@ export class MarkedCalendar extends LitElement {
 
   createDayCells(dayHeaderLength) {
     this.DAYS_HEADER.textContent = '';
-    for (let day = 1; day <= dayHeaderLength; day++) {
+    for (let day = 1; day <= dayHeaderLength; day+=1) {
       const dayHeader = document.createElement('div');
       dayHeader.className = 'dayHeader';
       dayHeader.textContent = day;
@@ -246,29 +244,29 @@ export class MarkedCalendar extends LitElement {
     const structure = this._getCurrentLSStructure();
     const data = structure[this.year];
     const days = this.getArrDaysByMonth()[month];
-    for (let day = 0; day < days; day++) {
+    for (let day = 0; day < days; day+=1) {
       const content = (data[month][day]) ? data[month][day] : '';
       const dayContainer = this.setDayContent(content, month, day);
       monthContainer.appendChild(dayContainer);
     }
   }
 
-  _decrementMonth(e) {
-    this.month--;
+  _decrementMonth() {
+    this.month-=1;
     if (this.month === 0) {
       this.month = 11;
-      this.year--;
+      this.year-=1;
       this._calcEasterWeek();
     }
     this.createWeeks(this.month);
     this.shadowRoot.querySelector('#navTitle').textContent = `${this.MONTH_LETTERS.sp[this.month].name} ${this.year}`;
   }
 
-  _incrementMonth(e) {
-    this.month++;
+  _incrementMonth() {
+    this.month+=1;
     if (this.month === 12) {
       this.month = 0;
-      this.year++;
+      this.year+=1;
       this._calcEasterWeek();
     }
     this.createWeeks(this.month);
@@ -276,22 +274,22 @@ export class MarkedCalendar extends LitElement {
   }
 
   addBtnEventsMonthNavBar() {
-    this.shadowRoot.querySelector('#lastMonthBtn').onclick = this._decrementMonth;
-    this.shadowRoot.querySelector('#nextMonthBtn').onclick = this._incrementMonth;
+    this.shadowRoot.querySelector('#lastMonthBtn').addEventListener('click', this._decrementMonth.bind(this));
+    this.shadowRoot.querySelector('#nextMonthBtn').addEventListener('click', this._incrementMonth.bind(this));
     if (this.changeView) {
-      this.shadowRoot.querySelector('#changeViewBtn').onclick = (e) => {
+      this.shadowRoot.querySelector('#changeViewBtn').addEventListener('click', () => {
         this.view = 'year';
         this.generateVisualStructure();
-      };
+      });
     }
   }
 
-  _decrementYear(e) {
-    this.year--;
+  _decrementYear() {
+    this.year-=1;
     if (typeof window.localStorage[this.structureName] === 'undefined') {
       const structure = this.generateDataStructure();
       localStorage.setItem(this.structureName, JSON.stringify(structure));
-      this.year++;
+      this.year+=1;
     }
     this._calcEasterWeek();
     this.createDayCells(this.DAYHEADERLENGTH);
@@ -299,14 +297,14 @@ export class MarkedCalendar extends LitElement {
     this.shadowRoot.querySelector('#navTitle').textContent = `${this.year}`;
   }
 
-  _incrementYear(e) {
-    this.year++;
+  _incrementYear() {
+    this.year+=1;
     if (typeof window.localStorage[this.structureName] === 'undefined') {
       if (this.saveData) {
         const structure = this.generateDataStructure();
         localStorage.setItem(this.structureName, JSON.stringify(structure));
       } else {
-        this.year--;
+        this.year-=1;
         return;
       }
     }
@@ -317,13 +315,13 @@ export class MarkedCalendar extends LitElement {
   }
 
   addBtnEventsYearNavBar() {
-    this.shadowRoot.querySelector('#lastYearBtn').onclick = this._decrementYear;
-    this.shadowRoot.querySelector('#nextYearBtn').onclick = this._incrementYear;
+    this.shadowRoot.querySelector('#lastYearBtn').addEventListener('click', this._decrementYear.bind(this));
+    this.shadowRoot.querySelector('#nextYearBtn').addEventListener('click', this._incrementYear.bind(this));
     if (this.changeView) {
-      this.shadowRoot.querySelector('#changeViewBtn').onclick = (e) => {
+      this.shadowRoot.querySelector('#changeViewBtn').addEventListener('click', () => {
         this.view = 'month';
         this.generateVisualStructure();
-      };
+      });
     }
   }
 
@@ -362,8 +360,8 @@ export class MarkedCalendar extends LitElement {
     this._addNavEvents(mode);
   }
 
-  drawMonthHeaderBar(month) {
-    month = Number(month);
+  drawMonthHeaderBar() {
+    // month = Number(month);
     this.MAIN_CONTAINER.textContent = '';
     this.MONTH_HEADER.textContent = '';
     this.DAYS_HEADER.textContent = '';
@@ -371,7 +369,7 @@ export class MarkedCalendar extends LitElement {
   }
 
   drawDayOfTheWeeksHeader() {
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 7; i+=1) {
       const weekDayContainer = document.createElement('span');
       weekDayContainer.className = 'dayofweek';
       weekDayContainer.textContent = this.DAYOFWEEK_LETTER[this.lang][i].letter;
@@ -379,19 +377,20 @@ export class MarkedCalendar extends LitElement {
     }
   }
 
-  drawMonth(month) {
-    month = Number(month);
+  drawMonth(m) {
+    const month = Number(m);
     const structure = this._getCurrentLSStructure();
     const data = structure[this.year];
     const firstDay = new Date(`${month + 1  }/1/${  this.year}`).getDay();
     const lastDay = new Date(this.year, (month + 1), 0).getDate();
     const firstDayOfWeek = (firstDay === 0) ? 7 : firstDay;
     let counterDay = 0;
-    for (let i = 1; i <= 42; i++) {
+    for (let i = 1; i <= 42; i+=1) {
       const weekDayContainer = document.createElement('span');
       if (i >= firstDayOfWeek && counterDay < lastDay) {
         weekDayContainer.className = 'dayofmonth';
-        weekDayContainer.textContent = ++counterDay;
+        counterDay+=1;
+        weekDayContainer.textContent = counterDay;
         const dayContainer = this.setDayContent(data[month][counterDay - 1], month, counterDay - 1);
         weekDayContainer.appendChild(dayContainer);
       }
@@ -415,8 +414,8 @@ export class MarkedCalendar extends LitElement {
   }
 
   createMonths() {
-    const structure = this._getCurrentLSStructure();
-    const data = structure[this.year];
+    // const structure = this._getCurrentLSStructure();
+    // const data = structure[this.year];
     const months = Object.keys(this.getArrDaysByMonth());
     this.MONTH_HEADER.textContent = '';
     this.MAIN_CONTAINER.textContent = '';
@@ -435,9 +434,9 @@ export class MarkedCalendar extends LitElement {
 
       this.MONTH_HEADER.appendChild(monthHeader);
       this.MAIN_CONTAINER.appendChild(monthContainer);
-      this.shadowRoot.querySelector(`#month_${  name}`).onclick = this._changeToViewMonth;
+      this.shadowRoot.querySelector(`#month_${  name}`).addEventListener('click', this._changeToViewMonth.bind(this));
     });
-    this.MAIN_CONTAINER.onclick = this.setCellValue;
+    this.MAIN_CONTAINER.addEventListener('click', this.setCellValue.bind(this));
   }
 
   generateVisualStructure() {
@@ -453,7 +452,8 @@ export class MarkedCalendar extends LitElement {
     }
   }
 
-  drawIsWeekend(dayContainer, month, day) {
+  drawIsWeekend(dayContainerEl, month, day) {
+    const dayContainer = dayContainerEl;
     let noWeekend = true;
     const DoW = new Date(`${this.year}/${Number(month) + 1}/${Number(day) + 1}`).getDay();
     if (DoW === 0 || DoW === 6) {
@@ -464,11 +464,12 @@ export class MarkedCalendar extends LitElement {
     return [dayContainer, noWeekend];
   }
 
-  drawIsHoliday(dayContainer, month, day) {
+  drawIsHoliday(dayContainerEl, month, day) {
+    const dayContainer = dayContainerEl;
     let noHolidays = true;
     const d = String(Number(day) + 1);
     const m = String(Number(month) + 1);
-    const y = this.year;
+    // const y = this.year;
     this.arrHolidays.forEach(dayHoliday => {
       if (dayHoliday.date === `${d  }/${  m}`) {
         dayContainer.style.background = '#999';
@@ -535,16 +536,22 @@ export class MarkedCalendar extends LitElement {
   }
 
   _getGradient(colorId) {
+    this._null = null;
     return `radial-gradient(ellipse at center, rgba(255,255,255,.1) -95%, ${colorId} 100%)`;
   }
 
   _selectLegendType(e) {
-    if (e.target.attributes[0].value >= 0) {
+    let { target } = e;
+    if (target.tagName === 'DIV') {
+      // eslint-disable-next-line prefer-destructuring
+      target = target.children[0];
+    }
+    if (target.attributes[0].value >= 0) {
       if (this.shadowRoot.querySelector('span[class="typeselected"]')) {
         this.shadowRoot.querySelector('span[class="typeselected"]').classList.remove('typeselected');
       }
-      this.selectedState = e.target.attributes[0].value;
-      e.target.classList.add('typeselected');
+      this.selectedState = target.attributes[0].value;
+      target.classList.add('typeselected');
     }
   }
 
@@ -581,11 +588,11 @@ export class MarkedCalendar extends LitElement {
      mes = 4;
     };
 
-    if (dia == 26 && mes == 4){ 
+    if (dia === 26 && mes === 4){ 
      dia = 19;
     };
 
-    if (dia == 25 && mes == 4 && d == 28 && e == 6 && a > 10){
+    if (dia === 25 && mes === 4 && d === 28 && e === 6 && a > 10){
      dia = 18;
     };
 
@@ -646,7 +653,7 @@ export class MarkedCalendar extends LitElement {
     this.NOTICE_LAYER = this.renderRoot.querySelector('#notice');
     this.init();
     this.renderRoot.querySelector('div [state="0"] span').style.border = '1px solid black';
-    this.MAIN_CONTAINER.onclick = this.setCellValue;
+    this.MAIN_CONTAINER.addEventListener('click', this.setCellValue.bind(this));
   }
 
   render() {
