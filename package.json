@@ -1,7 +1,7 @@
 {
   "name": "@manufosela/marked-calendar",
   "description": "Lit-Element webcomponent marked-calendar",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "main": "marked-calendar.js",
   "repository": {
     "type": "git",
